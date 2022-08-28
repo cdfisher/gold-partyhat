@@ -1,0 +1,4 @@
+pandas~=1.0.1 # Use ~=1.4.3 and numpy==1.23.2 if
+              # running on Raspberry Pi
+requests~=2.22.0
+osrs-hiscores<=0.6.1

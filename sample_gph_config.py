@@ -1,4 +1,4 @@
-"""sample_gph_constants.txt
+"""sample_gph_constants.py
 Contains constants needed by the bot.
 
 Add values to WEBHOOK, TEST_WEBHOOK (if desired) and change BOT_NAME

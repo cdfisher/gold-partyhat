@@ -10,6 +10,7 @@ import hs_wrapper as hs
 import pandas as pd
 
 from gph_config import *
+from gph_logging import log_message
 
 
 def update_xp(infile, skill, mode):
@@ -30,6 +31,7 @@ def update_xp(infile, skill, mode):
         # Expect infile to be user list and make array of users
         # TODO: Replace this with CSV handling to be able to use files direct
         # TODO: from the Clanmate Exporter plugin.
+
         with open(infile) as file:
             users = file.readlines()
             users = [line.rstrip() for line in users]
@@ -42,6 +44,7 @@ def update_xp(infile, skill, mode):
 
             # In the case that there is no highscores listing for user, skip them.
             except ValueError:
+                log_message('User ' + rsn + ' not found on highscores.')
                 continue
             score = hs.query_skill_xp(usr, skill)
 
@@ -73,7 +76,7 @@ def update_xp(infile, skill, mode):
             except ValueError:
                 # If we get a ValueError for a user already in df, they've probably
                 # changed their name.
-                print('User ' + rsn + ' not found! Potential name change detected!\n')
+                log_message('User ' + rsn + ' not found! Potential name change detected!')
                 continue
 
             prev = int(df.at[i, 'Start'])
@@ -109,7 +112,7 @@ def update_xp(infile, skill, mode):
             except ValueError:
                 # If we get a ValueError for a user already in df, they've probably
                 # changed their name.
-                print('User ' + rsn + ' not found! Potential name change detected!\n')
+                log_message('User ' + rsn + ' not found! Potential name change detected!')
                 continue
 
             prev = int(df.at[i, 'Start'])
@@ -134,4 +137,4 @@ def update_xp(infile, skill, mode):
 
     else:
         # mode not recognized or unsupported
-        print('Mode ' + mode + ' not recognized or not supported!')
+        log_message('Mode ' + mode + ' not recognized or not supported!')

@@ -9,6 +9,9 @@ import random
 
 from data_updater import update_xp
 from gph_config import *
+from gph_logging import log_message
+
+log_message('Running final update for contest: ' + CONTEST_NAME)
 
 df = update_xp(FILE_NAME + '.csv', SKILL, 'end')
 
@@ -20,8 +23,7 @@ win_emoji = [':first_place:', ':second_place:', ':third_place:']
 
 for i in range(WINNERS):
     rsn = df.at[i, 'RSN']
-    line = win_emoji[i] + ': ' + rsn + ' XP gained: ' + str(df.at[i, 'Gained'])
-    msg += line + '\n'
+    line = '{}: {} XP gained: {:,}\n'.format(win_emoji[i], rsn, df.at[i, 'Gained'])
 
 participants = set()
 
@@ -59,5 +61,7 @@ winners = sorted(random.sample(participants, RAFFLE_WINNERS))
 
 for w in winners:
     msg += w + '\n'
+
+log_message('Winners selected and raffle prize drawn.')
 
 discord_integration.send_message(msg)

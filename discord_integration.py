@@ -6,6 +6,7 @@ import requests
 import datetime
 
 from gph_config import *
+from gph_logging import log_message
 
 # Handles quick switching between sending messages to the Discord test server
 # and to the production server.
@@ -36,7 +37,7 @@ def send_message(message):
         print(err)
     else:
         timestamp = datetime.datetime.now()
-        print('Payload delivered with code {} at {}'.format(result.status_code, timestamp))
+        log_message('Payload delivered with code {} at {}'.format(result.status_code, timestamp))
 
 
 # TODO Implement image sending once data graphing is implemented

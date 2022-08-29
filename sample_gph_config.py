@@ -8,7 +8,7 @@ Then rename file to 'gph_constants.py' before running.
 
 # ---------------Bot info---------------
 # Version number for logging purposes (NYI)
-GPH_VERSION = 'v0.1 alpha'
+GPH_VERSION = 'v0.2 alpha'
 # Bot name to include in JSON payload
 BOT_NAME = 'Gold Partyhat'
 
@@ -40,6 +40,9 @@ WINNERS = 3
 RAFFLE_WINNERS = 1
 # Name to print on contest start/update/end and in logs (logs NYI)
 CONTEST_NAME = 'Sample Runecraft skilling contest'
+# Name to use for data CSV file
 FILE_NAME = 'runecraft-sample-contest'
 # Skill to use for contest
 SKILL = 'runecraft'
+# File name to use for log file
+LOG_NAME = 'gph-log.txt'

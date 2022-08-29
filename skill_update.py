@@ -6,6 +6,9 @@ import discord_integration
 
 from data_updater import update_xp
 from gph_config import *
+from gph_logging import log_message
+
+log_message('Updating contest: ' + CONTEST_NAME)
 
 df = update_xp(FILE_NAME + '.csv', SKILL, 'update')
 
@@ -15,7 +18,8 @@ msg = CONTEST_NAME + ' Top ' + str(TOP_N) + ' (so far):\n'
 
 for i in range(TOP_N):
     rsn = df.at[i, 'RSN']
-    line = str(i + 1) + ') ' + rsn + ' XP gained: ' + str(df.at[i, 'Gained'])
+
+    line = '{}) {} XP gained: {:,}\n'.format(i+1, rsn, df.at[i, 'Gained'])
     if df.at[i, 'Gained'] >= THRESHOLD:
         participants.add(rsn)
     msg += line + '\n'
@@ -51,5 +55,7 @@ df.to_csv(FILE_NAME + '.csv', index=False)
 # TODO: Append one last line with the timestamp that this was
 # TODO: run to the csv file. Then we can set up the "last updated"
 # TODO: functionality.
+
+log_message('Contest successfully updated.')
 
 discord_integration.send_message(msg)

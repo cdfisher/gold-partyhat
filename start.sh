@@ -7,3 +7,4 @@
 # read it.
 sudo chmod -R 777 star-thieving-test-ranks.csv # Replace with file name
                                                # used in gph_config.py
+sudo chmod -R 777 *log*.txt # Makes logs accessable for future updates.

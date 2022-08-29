@@ -23,8 +23,7 @@ win_emoji = [':first_place:', ':second_place:', ':third_place:']
 
 for i in range(WINNERS):
     rsn = df.at[i, 'RSN']
-    line = win_emoji[i] + ': ' + rsn + ' XP gained: ' + str(df.at[i, 'Gained'])
-    msg += line + '\n'
+    line = '{}: {} XP gained: {:,}\n'.format(win_emoji[i], rsn, df.at[i, 'Gained'])
 
 participants = set()
 
@@ -66,4 +65,3 @@ for w in winners:
 log_message('Winners selected and raffle prize drawn.')
 
 discord_integration.send_message(msg)
-

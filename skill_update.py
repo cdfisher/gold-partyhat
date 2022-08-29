@@ -18,7 +18,8 @@ msg = CONTEST_NAME + ' Top ' + str(TOP_N) + ' (so far):\n'
 
 for i in range(TOP_N):
     rsn = df.at[i, 'RSN']
-    line = str(i + 1) + ') ' + rsn + ' XP gained: ' + str(df.at[i, 'Gained'])
+
+    line = '{}) {} XP gained: {:,}\n'.format(i+1, rsn, df.at[i, 'Gained'])
     if df.at[i, 'Gained'] >= THRESHOLD:
         participants.add(rsn)
     msg += line + '\n'

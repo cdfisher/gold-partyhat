@@ -13,8 +13,8 @@ log_message('Starting competition for skill: ' + SKILL +
 
 df = update_xp(GROUP_FILE, SKILL, 'start')
 
-msg += CONTEST_NAME + ' has begun. Get ' + str(THRESHOLD) + ' XP to be ' \
-                            'eligible to win the participation raffle!\n'
+msg += '{} has begun. Get {:,} XP to be eligible for the ' \
+       'participation raffle!\n'.format(CONTEST_NAME, THRESHOLD)
 
 n_users = len(df.index)
 msg += str(n_users) + ' members are being tracked!\n'

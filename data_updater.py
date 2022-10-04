@@ -44,7 +44,7 @@ def update_xp(infile, skill, mode):
 
             # In the case that there is no highscores listing for user, skip them.
             except ValueError:
-                log_message('User ' + rsn + ' not found on highscores.')
+                log_message('User {} not found on highscores.'.format(rsn))
                 continue
             score = hs.query_skill_xp(usr, skill)
 
@@ -76,7 +76,7 @@ def update_xp(infile, skill, mode):
             except ValueError:
                 # If we get a ValueError for a user already in df, they've probably
                 # changed their name.
-                log_message('User ' + rsn + ' not found! Potential name change detected!')
+                log_message('User {} not found! Potential name change detected!'.format(rsn))
                 continue
 
             prev = int(df.at[i, 'Start'])
@@ -112,7 +112,7 @@ def update_xp(infile, skill, mode):
             except ValueError:
                 # If we get a ValueError for a user already in df, they've probably
                 # changed their name.
-                log_message('User ' + rsn + ' not found! Potential name change detected!')
+                log_message('User {} not found! Potential name change detected!'.format(rsn))
                 continue
 
             prev = int(df.at[i, 'Start'])
@@ -137,4 +137,4 @@ def update_xp(infile, skill, mode):
 
     else:
         # mode not recognized or unsupported
-        log_message('Mode ' + mode + ' not recognized or not supported!')
+        log_message('Mode {} not recognized or not supported!'.format(mode))

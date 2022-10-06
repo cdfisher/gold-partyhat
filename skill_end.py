@@ -11,19 +11,19 @@ from data_updater import update_xp
 from gph_config import *
 from gph_logging import log_message
 
-log_message('Running final update for contest: {}'.format(CONTEST_NAME))
+log_message('Running final update for contest: ' + CONTEST_NAME)
 
 df = update_xp(FILE_NAME + '.csv', SKILL, 'end')
 
 df.to_csv('final-' + FILE_NAME + '.csv', index=False)
 
-msg = '{} winners:\n'.format(CONTEST_NAME)
+msg = CONTEST_NAME + ' winners:\n'
 
 win_emoji = [':first_place:', ':second_place:', ':third_place:']
 
 for i in range(WINNERS):
     rsn = df.at[i, 'RSN']
-    line = '{}: {} XP gained: {:,}\n'.format(win_emoji[i], rsn, df.at[i, 'Gained'])
+    msg += '{}: {} XP gained: {:,}\n'.format(win_emoji[i], rsn, df.at[i, 'Gained'])
 
 participants = set()
 
@@ -35,8 +35,8 @@ for i in range(WINNERS, len(df.index)):
     else:
         break
 
-line = '\n{} have met the participation threshold for a prize so ' \
-           'far!\n'.format(len(participants))
+line = '\n' + str(len(participants)) + ' have met the participation ' \
+                                       'threshold for a prize!\n'
 
 msg += line
 

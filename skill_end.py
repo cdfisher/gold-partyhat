@@ -23,7 +23,7 @@ win_emoji = [':first_place:', ':second_place:', ':third_place:']
 
 for i in range(WINNERS):
     rsn = df.at[i, 'RSN']
-    line = '{}: {} XP gained: {:,}\n'.format(win_emoji[i], rsn, df.at[i, 'Gained'])
+    msg += '{}: {} XP gained: {:,}\n'.format(win_emoji[i], rsn, df.at[i, 'Gained'])
 
 participants = set()
 

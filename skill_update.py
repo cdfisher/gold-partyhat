@@ -8,13 +8,13 @@ from data_updater import update_xp
 from gph_config import *
 from gph_logging import log_message
 
-log_message('Updating contest: ' + CONTEST_NAME)
+log_message('Updating contest: {}'.format(CONTEST_NAME))
 
 df = update_xp(FILE_NAME + '.csv', SKILL, 'update')
 
 participants = set()
 
-msg = CONTEST_NAME + ' Top ' + str(TOP_N) + ' (so far):\n'
+msg = CONTEST_NAME + ' Top {} (so far):\n'.format(TOP_N)
 
 for i in range(TOP_N):
     rsn = df.at[i, 'RSN']
@@ -40,8 +40,8 @@ elif par_len == 1:
     line = '\nOnly one player has met the participation threshold for a prize so ' \
            'far!\n'
 else:
-    line = '\n' + str(len(participants)) + ' have met the participation ' \
-                                           'threshold for a prize so far!\n'
+    line = '\n{} have met the participation threshold for a prize so ' \
+           'far!\n'.format(len(participants))
 
 msg += line
 

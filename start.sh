@@ -5,6 +5,8 @@
 
 # Changes file permissions for the CSV data file so skill_update.py can
 # read it.
-sudo chmod -R 777 star-thieving-test-ranks.csv # Replace with file name
-                                               # used in gph_config.py
+sudo chmod -R 777 *.csv # Wildcard is a less than ideal solution so
+                        # this will probably be replaced by pulling
+                        # a value from a config file in the future
+
 sudo chmod -R 777 *log*.txt # Makes logs accessable for future updates.

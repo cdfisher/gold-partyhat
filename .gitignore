@@ -21,6 +21,7 @@ wh_test.py
 group.txt
 group.csv
 raw-group.txt
+stars.txt
 *.csv
 *log*.txt
 

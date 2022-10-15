@@ -7,7 +7,7 @@ from data_updater import update_xp
 from gph_config import *
 from gph_logging import log_message
 
-msg = 'Running gold-partyhat {}\n'.format(GPH_VERSION)
+msg = 'Running {} {}\n'.format(BOT_NAME, GPH_VERSION)
 log_message('Starting competition for skill: {} running Gold '
             'Partyhat {}'.format(SKILL, GPH_VERSION))
 log_message('Competition name: {}'.format(CONTEST_NAME))

@@ -8,7 +8,7 @@ Then rename file to 'gph_config.py' before running.
 
 # ---------------Bot info---------------
 # Version number for logging purposes (NYI)
-GPH_VERSION = 'v0.2.1 alpha'
+GPH_VERSION = 'v0.2.2 alpha'
 # Bot name to include in JSON payload
 BOT_NAME = 'Gold Partyhat'
 

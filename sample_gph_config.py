@@ -1,14 +1,14 @@
-"""sample_gph_constants.py
+"""sample_gph_config.py
 Contains constants needed by the bot.
 
 Add values to WEBHOOK, TEST_WEBHOOK (if desired) and change BOT_NAME
 and the values listed under Bot Configuration as desired.
-Then rename file to 'gph_constants.py' before running.
+Then rename file to 'gph_config.py' before running.
 """
 
 # ---------------Bot info---------------
 # Version number for logging purposes (NYI)
-GPH_VERSION = 'v0.2 alpha'
+GPH_VERSION = 'v0.2.1 alpha'
 # Bot name to include in JSON payload
 BOT_NAME = 'Gold Partyhat'
 

@@ -7,8 +7,8 @@ Then rename file to 'gph_config.py' before running.
 """
 
 # ---------------Bot info---------------
-# Version number for logging purposes (NYI)
-GPH_VERSION = 'v0.2.2 alpha'
+# Version number for logging purposes
+GPH_VERSION = 'v0.3 alpha'
 # Bot name to include in JSON payload
 BOT_NAME = 'Gold Partyhat'
 
@@ -44,5 +44,7 @@ CONTEST_NAME = 'Sample Runecraft skilling contest'
 FILE_NAME = 'runecraft-sample-contest'
 # Skill to use for contest
 SKILL = 'runecraft'
+# Boss to use for bossing contests
+BOSS = 'tempoross'
 # File name to use for log file
 LOG_NAME = 'gph-log.txt'

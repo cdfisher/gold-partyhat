@@ -18,7 +18,6 @@ else:
 
 def send_message(message):
     """Send text message to Discord.
-
     :param message: Text of the message to send. Length <= 2000 characters.
     :return: Prints status code or HTTP error to console.
     """

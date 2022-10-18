@@ -13,7 +13,10 @@ SKILLS = ['overall', 'attack', 'defence', 'strength', 'hitpoints', 'ranged', 'pr
           'mining', 'herblore', 'agility', 'thieving', 'slayer', 'farming', 'runecraft', 'hunter',
           'construction']
 
-# TODO: Add ACTIVITIES
+ACTIVITIES = ['league_points', 'bounty_hunter_hunter', 'bounty_hunter_rogue', 'clue_scrolls_all',
+              'clue_scrolls_beginner', 'clue_scrolls_easy', 'clue_scrolls_medium', 'clue_scrolls_hard',
+              'clue_scrolls_elite', 'clue_scrolls_master', 'lms_rank', 'pvp_arena_rank',
+              'soul_wars_zeal', 'rifts_closed']
 
 BOSSES = ['abyssal_sire', 'alchemical_hydra', 'barrows_chests', 'bryophyta', 'callisto', 'cerberus',
           'chambers_of_xeric', 'chambers_of_xeric_challenge_mode', 'chaos_elemental', 'chaos_fanatic',
@@ -94,9 +97,41 @@ def query_skill_xp(user, skill):
         return int(user.construction.xp)
     else:
         print(skill)
-        return 'Skill not recognized'
+        return 'Skill not recognized.\n'
 
-# TODO: Implement query_activity_score(user, activity)
+
+def query_activity_score(user, activity):
+    if activity == 'league_points':
+        return int(user.league_points.score)
+    elif activity == 'bounty_hunter_hunter':
+        return int(user.bounty_hunter_hunter.score)
+    elif activity == 'bounty_hunter_rogue':
+        return int(user.bounty_hunter_rogue.score)
+    elif activity == 'clue_scrolls_all':
+        return int(user.clue_scrolls_all.score)
+    elif activity == 'clue_scrolls_beginner':
+        return int(user.clue_scrolls_beginner.score)
+    elif activity == 'clue_scrolls_easy':
+        return int(user.clue_scrolls_easy.score)
+    elif activity == 'clue_scrolls_medium':
+        return int(user.clue_scrolls_medium.score)
+    elif activity == 'clue_scrolls_hard':
+        return int(user.clue_scrolls_hard.score)
+    elif activity == 'clue_scrolls_elite':
+        return int(user.clue_scrolls_elite.score)
+    elif activity == 'clue_scrolls_master':
+        return int(user.clue_scrolls_master.score)
+    elif activity == 'lms_rank':
+        return int(user.lms_rank.score)
+    elif activity == 'pvp_arena_rank':
+        return int(user.pvp_arena_rank.score)
+    elif activity == 'soul_wars_zeal':
+        return int(user.soul_wars_zeal.score)
+    elif activity == 'rifts_closed':
+        return int(user.rifts_closed.score)
+    else:
+        print(activity)
+        return 'Activity not recognized.\n'
 
 
 def query_boss_kc(user, boss):
@@ -142,8 +177,8 @@ def query_boss_kc(user, boss):
         return int(user.dagannoth_supreme.kills)
     elif boss == 'deranged_archaeologist':
         return int(user.deranged_archaeologist.kills)
-    elif boss == 'general_graador':
-        return int(user.general_graador.kills)
+    elif boss == 'general_graardor':
+        return int(user.general_graardor.kills)
     elif boss == 'giant_mole':
         return int(user.giant_mole.kills)
     elif boss == 'grotesque_guardians':
@@ -156,9 +191,9 @@ def query_boss_kc(user, boss):
         return int(user.king_black_dragon.kills)
     elif boss == 'kraken':
         return int(user.kraken.kills)
-    elif boss == 'kree_ara':
-        return int(user.kree_ara.kills)
-    elif boss == 'krul_tsutsaroth':
+    elif boss == 'kree_arra':
+        return int(user.kree_arra.kills)
+    elif boss == 'kril_tsutsaroth':
         return int(user.kril_tsutsaroth.kills)
     elif boss == 'mimic':
         return int(user.mimic.kills)
@@ -210,19 +245,46 @@ def query_boss_kc(user, boss):
         return int(user.zulrah.kills)
     else:
         print(boss)
-        return 'Boss not recognized'
+        return 'Boss not recognized.\n'
 
 
 def fetch_all_skills(rsn, user):
-    """Prints list of user's XP in all skills to console.
-    Not currently used but may be updated to a more useful form in the
-    future.
+    """Writes list of user's XP in all skills to string and returns.
 
     :param rsn: String of player's OSRS username.
     :param user: User object for player (as returned by get_user())
-    :return: No return value, prints to console
+    :return: String msg
     """
-    print(rsn + "'s XP:")
-    for i in range(len(SKILLS)):
-        print(SKILLS[i] + ' : ' + query_skill_xp(user, SKILLS[i]))
 
+    msg = '{}\'s XP: \n'.format(rsn)
+    for i in range(len(SKILLS)):
+        msg += '{} : {} XP\n'.format(SKILLS[i], query_skill_xp(user, SKILLS[i]))
+    return msg
+
+
+def fetch_all_activities(rsn, user):
+    """Writes list of user's score in all activities to string and returns.
+
+    :param rsn: String of player's OSRS username.
+    :param user: User object for player (as returned by get_user())
+    :return: String msg
+    """
+
+    msg = '{}\'s activity scores: \n'.format(rsn)
+    for i in range(len(ACTIVITIES)):
+        msg += '{} : {} \n'.format(ACTIVITIES[i], query_activity_score(user, ACTIVITIES[i]))
+    return msg
+
+
+def fetch_all_bosses(rsn, user):
+    """Writes list of user's KC for all bosses to string and returns.
+
+    :param rsn: String of player's OSRS username.
+    :param user: User object for player (as returned by get_user())
+    :return: String msg
+    """
+
+    msg = '{}\'s boss KC: \n'.format(rsn)
+    for i in range(len(BOSSES)):
+        msg += '{} : {} KC\n'.format(BOSSES[i], query_boss_kc(user, BOSSES[i]))
+    return msg

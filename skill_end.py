@@ -29,37 +29,74 @@ for i in range(WINNERS):
     else:
         msg += ' {}) : {} XP gained: {:,}\n'.format(i+1, rsn, df.at[i, 'Gained'])
 
-participants = set()
+if RAFFLE_MODE == 'classic':
+    participants = set()
 
-for i in range(WINNERS, len(df.index)):
-    gained = df.at[i, 'Gained']
-    if gained >= THRESHOLD:
-        rsn = df.at[i, 'RSN']
-        participants.add(rsn)
+    for i in range(WINNERS, len(df.index)):
+        gained = df.at[i, 'Gained']
+        if gained >= THRESHOLD:
+            rsn = df.at[i, 'RSN']
+            participants.add(rsn)
+        else:
+            break
+
+    line = '\n{} have met the participation threshold for a prize!\n'.format(str(len(participants)))
+
+    msg += line
+
+    par_srtd = sorted(list(participants))
+
+    for x in par_srtd:
+        msg += x + '\n'
+
+    if len(par_srtd) <= RAFFLE_WINNERS:
+        # If there are fewer participants than prize packages, everyone that reached the threshold gets one
+        msg += 'There were enough prizes allotted for everyone listed above as a participant to get one!\n'
     else:
-        break
+        # Otherwise draw prizes as normal
+        msg += '\nThe winners of the participation prizes are:\n'
 
-line = '\n' + str(len(participants)) + ' have met the participation ' \
-                                       'threshold for a prize!\n'
+        winners = sorted(random.sample(par_srtd, RAFFLE_WINNERS))
 
-msg += line
+        for w in winners:
+            msg += w + '\n'
 
-par_srtd = sorted(list(participants))
+elif RAFFLE_MODE == 'top_participants':
+    participants = set()
 
-for x in par_srtd:
-    msg += x + '\n'
+    for i in range(WINNERS, WINNERS+N_PARTICIPANTS):
+        gained = df.at[i, 'Gained']
+        if gained >= THRESHOLD:
+            rsn = df.at[i, 'RSN']
+            participants.add(rsn)
+        else:
+            break
 
-if len(par_srtd) <= RAFFLE_WINNERS:
-    # If there are fewer participants than prize packages, everyon that reached the threshold gets one
-    msg += 'There were enough prizes allotted for everyone listed above as a participant to get one!\n'
+    line = '\n{} have met the participation threshold of {} XP and are in the running ' \
+           'for a participation prize!\n'.format(str(len(participants)), THRESHOLD)
+
+    msg += line
+
+    par_srtd = sorted(list(participants))
+
+    for x in par_srtd:
+        msg += x + '\n'
+
+    if len(par_srtd) <= RAFFLE_WINNERS:
+        # If there are fewer participants than prize packages, everyone that reached the threshold gets one
+        msg += 'There were enough prizes allotted for everyone listed above as a participant to get one!\n'
+    else:
+        # Otherwise draw prizes as normal
+        msg += '\nThe winners of the participation prizes are:\n'
+
+        winners = sorted(random.sample(par_srtd, RAFFLE_WINNERS))
+
+        for w in winners:
+            msg += w + '\n'
+
 else:
-    # Otherwise draw prizes as normal
-    msg += '\nThe winners of the participation prizes are:\n'
-
-    winners = sorted(random.sample(par_srtd, RAFFLE_WINNERS))
-
-    for w in winners:
-        msg += w + '\n'
+    # Mode not supported
+    log_message('Mode \'{}\' not supported.\n'.format(RAFFLE_MODE))
 
 log_message('Winners selected and raffle prize drawn.')
 

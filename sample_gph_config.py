@@ -8,7 +8,7 @@ Then rename file to 'gph_config.py' before running.
 
 # ---------------Bot info---------------
 # Version number for logging purposes
-GPH_VERSION = 'v0.3.1 alpha'
+GPH_VERSION = 'v0.3.2 alpha'
 # Bot name to include in JSON payload
 BOT_NAME = 'Gold Partyhat'
 
@@ -38,6 +38,10 @@ THRESHOLD = 500000
 WINNERS = 3
 # Number of players to select as winners of participation raffle
 RAFFLE_WINNERS = 1
+# Mode to use for drawing participation prizes {'classic', 'top_participants'}
+RAFFLE_MODE = 'top_participants'
+# Number of participants to include in raffle if mode = 'top_participants'
+N_PARTICIPANTS = 10
 # Name to print on contest start/update/end and in logs (logs NYI)
 CONTEST_NAME = 'Sample Runecraft skilling contest'
 # Name to use for data CSV file

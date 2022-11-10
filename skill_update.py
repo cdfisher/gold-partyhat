@@ -14,7 +14,7 @@ df = update_xp(FILE_NAME + '.csv', SKILL, 'update')
 
 participants = set()
 
-msg = CONTEST_NAME + ' Top {} (so far):\n'.format(TOP_N)
+msg = CONTEST_NAME + ' Top {} (so far):\n\n'.format(TOP_N)
 
 for i in range(TOP_N):
     rsn = df.at[i, 'RSN']

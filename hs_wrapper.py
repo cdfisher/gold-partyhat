@@ -7,17 +7,36 @@ https://github.com/cdfisher/osrs_highscores/
 
 from osrs_highscores import Highscores
 
-
+"""List of all valid skills listed on highscores
+"""
 SKILLS = ['overall', 'attack', 'defence', 'strength', 'hitpoints', 'ranged', 'prayer', 'magic',
           'cooking', 'woodcutting', 'fletching', 'fishing', 'firemaking', 'crafting', 'smithing',
           'mining', 'herblore', 'agility', 'thieving', 'slayer', 'farming', 'runecraft', 'hunter',
           'construction']
 
+"""Formatted list of skills, index matched with SKILLS
+"""
+FORMATTED_SKILLS = ['Overall', 'Attack', 'Defence', 'Strength', 'Hitpoints', 'Ranged', 'Prayer', 'Magic',
+                    'Cooking', 'Woodcutting', 'Fletching', 'Fishing', 'Firemaking', 'Crafting', 'Smithing',
+                    'Mining', 'Herblore', 'Agility', 'Thieving', 'Slayer', 'Farming', 'Runecraft', 'Hunter',
+                    'Construction']
+
+"""List of all valid activities listed on highscores
+"""
 ACTIVITIES = ['league_points', 'bounty_hunter_hunter', 'bounty_hunter_rogue', 'clue_scrolls_all',
               'clue_scrolls_beginner', 'clue_scrolls_easy', 'clue_scrolls_medium', 'clue_scrolls_hard',
               'clue_scrolls_elite', 'clue_scrolls_master', 'lms_rank', 'pvp_arena_rank',
               'soul_wars_zeal', 'rifts_closed']
 
+"""Formatted list of activities, index matched with ACTIVITIES
+"""
+FORMATTED_ACTIVITIES = ['League Points', 'Bounty Hunter (Hunter)', 'Bounty Hunter (Rogue)', 'Clue Scrolls (All)',
+                        'Clue Scrolls (Beginner)', 'Clue Scrolls (Easy)', 'Clue Scrolls (Medium)',
+                        'Clue Scrolls (Hard)', 'Clue Scrolls (Elite)', 'Clue Scrolls (Master)', 'LMS Rank',
+                        'PvP Arena Rank', 'Soul Wars Zeal', 'Rifts Closed']
+
+"""List of all valid bosses listed on highscores
+"""
 BOSSES = ['abyssal_sire', 'alchemical_hydra', 'barrows_chests', 'bryophyta', 'callisto', 'cerberus',
           'chambers_of_xeric', 'chambers_of_xeric_challenge_mode', 'chaos_elemental', 'chaos_fanatic',
           'commander_zilyana', 'corporeal_beast', 'crazy_archaeologist', 'dagannoth_prime',
@@ -28,6 +47,19 @@ BOSSES = ['abyssal_sire', 'alchemical_hydra', 'barrows_chests', 'bryophyta', 'ca
           'theatre_of_blood', 'theatre_of_blood_hard_mode', 'thermonuclear_smoke_devil',
           'tombs_of_amascut', 'tombs_of_amascut_expert_mode', 'tzkal_zuk', 'tztok_jad', 'venenatis',
           'vet_ion', 'vorkath', 'wintertodt', 'zalcano', 'zulrah']
+
+"""Formatted list of bosses, index matched with BOSSES
+"""
+FORMATTED_BOSSES = ['Abyssal Sire', 'Alchemical Hydra', 'Barrows Chests', 'Bryophyta', 'Callisto', 'Cerberus',
+                    'Chambers of Xeric', 'Chambers of Xeric Challenge Mode', 'Chaos Elemental', 'Chaos Fanatic',
+                    'Commander Zilyana', 'Corporeal Beast', 'Crazy Archaeologist', 'Dagannoth Prime',
+                    'Dagannoth Rex', 'Dagannoth Supreme', 'Deranged Archaeologist', 'General Graardor',
+                    'Giant Mole', 'Grotesque Guardians', 'Hespori', 'Kalphite Queen', 'King Black Dragon',
+                    'Kraken', 'Kree\'arra', 'K\'ril Tsutsaroth', 'Mimic', 'Nex', 'Nightmare', 'Phosani\'s Nightmare',
+                    'Obor', 'Sarachnis', 'Scorpia', 'Skotizo', 'Tempoross', 'The Gauntlet', 'The Corrupted Gauntlet',
+                    'Theatre of Blood', 'Theatre of Blood Hard Mode', 'Thermonuclear Smoke Devil',
+                    'Tombs of Amascut', 'Tombs of Amascut Expert Mode', 'TzKal-Zuk', 'TzTok-Jad', 'Venenatis',
+                    'Vet\'ion', 'Vorkath', 'Wintertodt', 'Zalcano', 'Zulrah']
 
 
 def get_user(rsn):
@@ -100,7 +132,75 @@ def query_skill_xp(user, skill):
         return 'Skill not recognized.\n'
 
 
+def query_skill_level(user, skill):
+    """ Queries XP listed on user's highscores page.
+    :param user: User object for player (as returned by get_user())
+    :param skill: String specifying the skill to query (Typically set as SKILL
+    in gph_config.py)
+    :return: int of player's XP in given skill.
+    """
+
+    if skill == 'overall':
+        return int(user.overall.level)
+    elif skill == 'attack':
+        return int(user.attack.level)
+    elif skill == 'defence':
+        return int(user.defence.level)
+    elif skill == 'strength':
+        return int(user.strength.level)
+    elif skill == 'hitpoints':
+        return int(user.hitpoints.level)
+    elif skill == 'ranged':
+        return int(user.ranged.level)
+    elif skill == 'prayer':
+        return int(user.prayer.level)
+    elif skill == 'magic':
+        return int(user.magic.level)
+    elif skill == 'cooking':
+        return int(user.cooking.level)
+    elif skill == 'woodcutting':
+        return int(user.woodcutting.level)
+    elif skill == 'fletching':
+        return int(user.fletching.level)
+    elif skill == 'fishing':
+        return int(user.fishing.level)
+    elif skill == 'firemaking':
+        return int(user.firemaking.level)
+    elif skill == 'crafting':
+        return int(user.crafting.level)
+    elif skill == 'smithing':
+        return int(user.smithing.level)
+    elif skill == 'mining':
+        return int(user.mining.level)
+    elif skill == 'herblore':
+        return int(user.herblore.level)
+    elif skill == 'agility':
+        return int(user.agility.level)
+    elif skill == 'thieving':
+        return int(user.thieving.level)
+    elif skill == 'slayer':
+        return int(user.slayer.level)
+    elif skill == 'farming':
+        return int(user.farming.level)
+    elif skill == 'runecraft':
+        return int(user.runecraft.level)
+    elif skill == 'hunter':
+        return int(user.hunter.level)
+    elif skill == 'construction':
+        return int(user.construction.level)
+    else:
+        print(skill)
+        return 'Skill not recognized.\n'
+
+
 def query_activity_score(user, activity):
+    """ Queries activity scores listed on user's highscores page.
+
+        :param user: User object for player (as returned by get_user())
+        :param activity: String specifying the activity to query (valid values
+        are listed in ACTIVITIES)
+        :return: int of player's score in given activity.
+        """
     if activity == 'league_points':
         return int(user.league_points.score)
     elif activity == 'bounty_hunter_hunter':

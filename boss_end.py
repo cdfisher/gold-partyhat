@@ -72,7 +72,7 @@ elif RAFFLE_MODE == 'top_participants':
         else:
             break
 
-    line = '\n{} have met the participation threshold of {} KC and are in the running ' \
+    line = '\nHere are the top {} who have met the participation threshold of {} KC and are in the running ' \
            'for a participation prize!\n'.format(str(len(participants)), THRESHOLD)
 
     msg += line

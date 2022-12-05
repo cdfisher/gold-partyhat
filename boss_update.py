@@ -2,11 +2,11 @@
 Script to update the standings for a bossing-based competition and send
 a message listing the top participants at the time of update.
 """
-import discord_integration
 
 from data_updater import update_kc
 from gph_config import *
 from gph_logging import log_message
+from webhook_handler import WebhookHandler
 
 log_message('Updating contest: {}'.format(CONTEST_NAME))
 
@@ -58,4 +58,5 @@ df.to_csv(FILE_NAME + '.csv', index=False)
 
 log_message('Contest successfully updated.')
 
-discord_integration.send_message(msg)
+wh = WebhookHandler()
+wh.send_message(msg)

@@ -4,12 +4,12 @@ a message listing the winners, all players that reached a pre-set
 threshold (set as THRESHOLD in gph_config.py), and randomly selects
 winners for participation prizes.
 """
-import discord_integration
 import random
 
 from data_updater import update_xp
 from gph_config import *
 from gph_logging import log_message
+from webhook_handler import WebhookHandler
 
 log_message('Running final update for contest: ' + CONTEST_NAME)
 
@@ -100,4 +100,5 @@ else:
 
 log_message('Winners selected and raffle prize drawn.')
 
-discord_integration.send_message(msg)
+wh = WebhookHandler()
+wh.send_message(msg)

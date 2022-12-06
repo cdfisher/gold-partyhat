@@ -12,6 +12,24 @@ import pandas as pd
 from gph_config import *
 from gph_logging import log_message
 
+master_colnames = ['Timestamp', 'Update number', 'RSN', 'overall', 'attack', 'defence', 'strength', 'hitpoints',
+                   'ranged', 'prayer', 'magic', 'cooking', 'woodcutting', 'fletching', 'fishing', 'firemaking',
+                   'crafting', 'smithing', 'mining', 'herblore', 'agility', 'thieving', 'slayer', 'farming',
+                   'runecraft',
+                   'hunter', 'construction', 'league_points', 'bounty_hunter_hunter', 'bounty_hunter_rogue',
+                   'clue_scrolls_all', 'clue_scrolls_beginner', 'clue_scrolls_easy', 'clue_scrolls_medium',
+                   'clue_scrolls_hard', 'clue_scrolls_elite', 'clue_scrolls_master', 'lms_rank', 'pvp_arena_rank',
+                   'soul_wars_zeal', 'rifts_closed', 'abyssal_sire', 'alchemical_hydra', 'barrows_chests', 'bryophyta',
+                   'callisto', 'cerberus', 'chambers_of_xeric', 'chambers_of_xeric_challenge_mode', 'chaos_elemental',
+                   'chaos_fanatic', 'commander_zilyana', 'corporeal_beast', 'crazy_archaeologist', 'dagannoth_prime',
+                   'dagannoth_rex', 'dagannoth_supreme', 'deranged_archaeologist', 'general_graardor', 'giant_mole',
+                   'grotesque_guardians', 'hespori', 'kalphite_queen', 'king_black_dragon', 'kraken', 'kree_arra',
+                   'kril_tsutsaroth', 'mimic', 'nex', 'nightmare', 'phosanis_nightmare', 'obor', 'sarachnis', 'scorpia',
+                   'skotizo', 'tempoross', 'the_gauntlet', 'the_corrupted_gauntlet', 'theatre_of_blood',
+                   'theatre_of_blood_hard_mode', 'thermonuclear_smoke_devil', 'tombs_of_amascut',
+                   'tombs_of_amascut_expert_mode', 'tzkal_zuk', 'tztok_jad', 'venenatis', 'vet_ion', 'vorkath',
+                   'wintertodt', 'zalcano', 'zulrah']
+
 
 def update_xp(infile, skill, mode):
     """ Fetches XP values from Highscores and updates the dataframe of these values
@@ -265,3 +283,116 @@ def update_kc(infile, boss, mode):
     else:
         # mode not recognized or unsupported
         log_message('Mode {} not recognized or not supported!'.format(mode))
+
+
+def update_entry(infile: str, game_mode: str, target: str, update_mode: str,
+                 update_number: int, master_dataframe: pd.DataFrame, logfile: str,
+                 contest_datafile: str):
+    if update_mode == 'start':
+        with open(infile) as file:
+            users = file.readlines()
+            users = [line.rstrip() for line in users]
+
+            # create contest_dataframe with each user's RSN and starting scores
+            df = pd.DataFrame(columns=['RSN', 'Start', 'Current', 'Gained'])
+            for rsn in users:
+                try:
+                    usr = hs.get_user(rsn)
+
+                except ValueError:
+                    log_message(f'User {rsn} not found on highscores', logfile)
+                    continue
+                if game_mode == 'skill':
+                    score = int(hs.query_skill_xp(usr, target))
+                elif game_mode == 'activity':
+                    score = int(hs.query_activity_score(usr, target))
+                elif game_mode == 'boss':
+                    score = int(hs.query_boss_kc(usr, target))
+                else:
+                    log_message(f'Target {target} not recognized', logfile)
+                if score < 0:
+                    score = 0
+                df.loc[len(df.index)] = [rsn, score, score, 0]
+                master_dataframe.loc[len(
+                    master_dataframe)] = hs.get_all_entries(rsn, update_number)
+
+            master_dataframe.to_csv(MASTER_DF_NAME, index=False)
+            df.to_csv(contest_datafile, index=False)
+
+            return df
+
+    elif update_mode == 'update':
+        df = pd.read_csv(contest_datafile, skipfooter=1, engine='python')
+
+        for i in range(len(df.index)):
+            rsn = df.at[i, 'RSN']
+            try:
+                usr = hs.get_user(rsn)
+            except ValueError:
+                log_message(f'User {rsn} not found! Potential name change detected!',
+                            log=logfile)
+                continue
+
+            score = 0
+
+            prev = int(df.at[i, 'Start'])
+            if game_mode == 'skill':
+                score = int(hs.query_skill_xp(usr, target))
+            elif game_mode == 'activity':
+                score = int(hs.query_activity_score(usr, target))
+            elif game_mode == 'boss':
+                score = int(hs.query_boss_kc(usr, target))
+            else:
+                log_message(f'Target {target} not recognized', log=logfile)
+            if score < 50:
+                score = prev
+            gained = int(score) - int(prev)
+            df.at[i, 'Current'] = score
+            df.at[i, 'Gained'] = gained
+
+            master_dataframe.loc[len(
+                master_dataframe)] = hs.get_all_entries(rsn, update_number)
+
+        df = df.sort_values(by=['Gained'], ascending=False).reset_index(drop=True)
+
+        return master_dataframe, df
+
+    elif update_mode == 'end':
+
+        df = pd.read_csv(contest_datafile, skipfooter=1, engine='python')
+
+        for i in range(len(df.index)):
+            rsn = df.at[i, 'RSN']
+            try:
+                usr = hs.get_user(rsn)
+            except ValueError:
+                log_message(f'User {rsn} not found! Potential name change detected!',
+                            log=logfile)
+                continue
+
+            score = 0
+
+            prev = int(df.at[i, 'Start'])
+            if game_mode == 'skill':
+                score = int(hs.query_skill_xp(usr, target))
+            elif game_mode == 'activity':
+                score = int(hs.query_activity_score(usr, target))
+            elif game_mode == 'boss':
+                score = int(hs.query_boss_kc(usr, target))
+            else:
+                log_message(f'Target {target} not recognized', log=logfile)
+            if score < 50:
+                score = prev
+            gained = int(score) - int(prev)
+            df.at[i, 'Current'] = score
+            df.at[i, 'Gained'] = gained
+
+            master_dataframe.loc[len(
+                master_dataframe)] = hs.get_all_entries(rsn, update_number)
+
+        df = df.sort_values(by=['Gained'], ascending=False).reset_index(drop=True)
+
+        return master_dataframe, df
+
+    else:
+        log_message(f'Update mode "{update_mode}" not recognized', log=logfile)

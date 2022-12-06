@@ -6,6 +6,7 @@ https://github.com/cdfisher/osrs_highscores/
 """
 
 from osrs_highscores import Highscores
+from datetime import *
 
 """List of all valid skills listed on highscores
 """
@@ -388,3 +389,27 @@ def fetch_all_bosses(rsn, user):
     for i in range(len(BOSSES)):
         msg += '{} : {} KC\n'.format(BOSSES[i], query_boss_kc(user, BOSSES[i]))
     return msg
+
+
+def get_all_entries(rsn: str, n_update: int) -> list:
+    now = datetime.now()
+    timestamp = now.strftime('[%d %b %Y - %H:%M:%S]')
+    outlist = [timestamp, n_update, rsn]
+    usr = get_user(rsn)
+    for i in range(len(SKILLS)):
+        xp = query_skill_xp(usr, SKILLS[i])
+        if xp <= 0:
+            xp = 0
+        outlist.append(xp)
+    for i in range(len(ACTIVITIES)):
+        score = query_activity_score(usr, ACTIVITIES[i])
+        if score <= 0:
+            score = 0
+        outlist.append(score)
+    for i in range(len(BOSSES)):
+        kc = query_boss_kc(usr, BOSSES[i])
+        if kc <= 0:
+            kc = 0
+        outlist.append(kc)
+
+    return outlist

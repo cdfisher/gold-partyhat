@@ -17,7 +17,6 @@ ENV/
 # Various files / backups
 server/
 utils/
-wh_test.py
 group.txt
 group.csv
 raw-group.txt

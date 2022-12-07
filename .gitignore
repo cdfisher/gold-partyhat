@@ -40,6 +40,8 @@ coverage.xml
 .hypothesis/
 test/
 *test*.sh
+*test*.py
+!*contest*.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

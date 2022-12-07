@@ -62,7 +62,8 @@ class WebhookHandler:
     def send_file(self, msg: str, filename: str, name=BOT_NAME, avatar=AVATAR_URL):
         self.config_webhook(msg, name)
         self.webhook_data["avatar_url"] = avatar
-        self.add_file(open(filename, 'rb'), filename)
+        fdata = open(filename, 'rb')
+        self.add_file(fdata, filename)
         response = self.make_post_request(wh_url, self.webhook_data, self._files)
         try:
             response.raise_for_status()
@@ -75,5 +76,6 @@ class WebhookHandler:
                         #f' at {timestamp}')
             print(f'File payload delivered with code {response.status_code}'
                         f' at {timestamp}')
+        fdata.close()
         self.webhook_data = {}
         self._files = {}

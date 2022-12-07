@@ -1,10 +1,11 @@
 """data_updater.py
 On start, loads player list from a file (currently a .txt, will be transistioning
 over to a .csv), and loads the highscores entry relevant to the competition into
-a pandas dataframe.
+a Pandas DataFrame. Appends a row for that user to a master dataframe that persists
+between contests.
 
 On update/end, loads from CSV and updates entries, as well as computing each
-player's competition progress.
+player's competition progress. Additionally, appends a row to the master dataframe.
 """
 import hs_wrapper as hs
 import pandas as pd
@@ -13,255 +14,200 @@ from gph_config import *
 from gph_logging import log_message
 
 
-def update_xp(infile, skill, mode):
-    """ Fetches XP values from Highscores and updates the dataframe of these values
+"""Used for updating the master_dataframe"""
+master_colnames = ['Timestamp', 'Update number', 'RSN', 'overall', 'attack', 'defence', 'strength', 'hitpoints',
+                   'ranged', 'prayer', 'magic', 'cooking', 'woodcutting', 'fletching', 'fishing', 'firemaking',
+                   'crafting', 'smithing', 'mining', 'herblore', 'agility', 'thieving', 'slayer', 'farming',
+                   'runecraft',
+                   'hunter', 'construction', 'league_points', 'bounty_hunter_hunter', 'bounty_hunter_rogue',
+                   'clue_scrolls_all', 'clue_scrolls_beginner', 'clue_scrolls_easy', 'clue_scrolls_medium',
+                   'clue_scrolls_hard', 'clue_scrolls_elite', 'clue_scrolls_master', 'lms_rank', 'pvp_arena_rank',
+                   'soul_wars_zeal', 'rifts_closed', 'abyssal_sire', 'alchemical_hydra', 'barrows_chests', 'bryophyta',
+                   'callisto', 'cerberus', 'chambers_of_xeric', 'chambers_of_xeric_challenge_mode', 'chaos_elemental',
+                   'chaos_fanatic', 'commander_zilyana', 'corporeal_beast', 'crazy_archaeologist', 'dagannoth_prime',
+                   'dagannoth_rex', 'dagannoth_supreme', 'deranged_archaeologist', 'general_graardor', 'giant_mole',
+                   'grotesque_guardians', 'hespori', 'kalphite_queen', 'king_black_dragon', 'kraken', 'kree_arra',
+                   'kril_tsutsaroth', 'mimic', 'nex', 'nightmare', 'phosanis_nightmare', 'obor', 'sarachnis', 'scorpia',
+                   'skotizo', 'tempoross', 'the_gauntlet', 'the_corrupted_gauntlet', 'theatre_of_blood',
+                   'theatre_of_blood_hard_mode', 'thermonuclear_smoke_devil', 'tombs_of_amascut',
+                   'tombs_of_amascut_expert_mode', 'tzkal_zuk', 'tztok_jad', 'venenatis', 'vet_ion', 'vorkath',
+                   'wintertodt', 'zalcano', 'zulrah']
 
-    :param infile: File used as input. For mode='start', this expects a .txt
-    with one username per line. For mode='update' and mode='end', expects a
-    CSV representation of a dataframe with columns {'RSN', 'Start', 'Current,
-    'Gained'}
-    :param skill: Str of the skill we're checking in the contest.
-    :param mode: {
-                'start': Takes list of group members and creates an initial
-    listing of their starting XP values, then exports the results as a CSV.
-                  'update': Loads CSV of rankings to dataframe, updates current XP and
-    calculates gains, then reorders by rank and returns the dataframe.
-                  'end': Loads CSV of rankings to dataframe, updates current XP and
-    calculates gains, then reorders by rank and returns the dataframe.}
-    :return: Pandas dataframe to be exported by the calling function, potentially
-    after further manipulation.
+
+def update_entry(infile: str, game_mode: str, target: str, update_mode: str,
+                 update_number: int, master_dataframe: pd.DataFrame, logfile: str,
+                 contest_datafile: str):
+    """Creates and updates both contest and master dataframes
+
+    :param infile: str: filename of a .txt file listing the players to track with the contest.
+    Only used when update_mode == 'start'. Otherwise can just be passed an empty string.
+    :param game_mode: str in {'skill', 'boss', 'activity'} denoting the type of target to
+    track.
+    :param target: str in hs.SKILLS, hs.BOSSES or hs.ACTIVITIES denoting the specific target
+    to track.
+    :param update_mode: str in {'start', 'update', 'end'} denoting which contest script is
+    calling the update, as this affects behavior.
+    :param update_number: int denoting the number of times the contest has been updated. Used
+    to mark rows in master_dataframe (multiple rows with the same RSN value may have the same
+    value in the 'Update Number' column. This is okay since it's used relative to a contest
+    and not in any absolute context.
+    :param master_dataframe: pd.DataFrame containing a master record of each player in infile's
+    HS pages over time.
+    :param logfile: str denoting where to write log messages.
+    :param contest_datafile: str denoting the .csv file where the contest_dataframe is saved.
+    :return: pd.DataFrame df: the contest_dataframe
     """
-    if mode == 'start':
-        # Expect infile to be user list and make array of users
-        # TODO: Replace this with CSV handling to be able to use files direct
-        # TODO: from the Clanmate Exporter plugin.
-
+    if update_mode == 'start':
+        # Expects infile to be a list of users. Parses that list and copies to an array
         with open(infile) as file:
             users = file.readlines()
             users = [line.rstrip() for line in users]
 
-        # Create dataframe with each user's RSN and starting XP
-        df = pd.DataFrame(columns=['RSN', 'Start', 'Current', 'Gained'])
-        for rsn in users:
-            try:
-                usr = hs.get_user(rsn)
+            # Create contest_dataframe with each user's RSN and starting scores
+            df = pd.DataFrame(columns=['RSN', 'Start', 'Current', 'Gained'])
+            for rsn in users:
+                # Fetch Highscores object for user 'rsn'
+                try:
+                    usr = hs.get_user(rsn)
 
-            # In the case that there is no highscores listing for user, skip them.
-            except ValueError:
-                log_message('User {} not found on highscores.'.format(rsn))
-                continue
-            score = int(hs.query_skill_xp(usr, skill))
+                # If user is not found on the highscores, log this and continue
+                except ValueError:
+                    log_message(f'User {rsn} not found on highscores', logfile)
+                    continue
 
-            # For players found in highscores that aren't on hs for skill, change
-            # score from -1 to 0
-            if score < 0:
-                score = 0
+                # Queries user's highscores entry for target
+                if game_mode == 'skill':
+                    score = int(hs.query_skill_xp(usr, target))
+                elif game_mode == 'activity':
+                    score = int(hs.query_activity_score(usr, target))
+                elif game_mode == 'boss':
+                    score = int(hs.query_boss_kc(usr, target))
+                else:
+                    log_message(f'Target {target} not recognized', logfile)
 
-            # Add user record to dataframe
-            df.loc[len(df.index)] = [rsn, score, score, 0]
+                # If a player is listed on the highscores but does not have an entry for
+                # target, set their score from -1 to 0
+                if score < 0:
+                    score = 0
 
-        # Export dataframe to file
-        df.to_csv(FILE_NAME + '.csv', index=False)
+                # Add user record to contest dataframe
+                df.loc[len(df.index)] = [rsn, score, score, 0]
 
-        return df
+                # Append a row for user in master dataframe
+                master_dataframe.loc[len(
+                    master_dataframe)] = hs.get_all_entries(rsn, update_number)
 
-    elif mode == 'update':
-        # Expect infile to be CSV of rankings and load into df
+            # Export both dataframes to .csv files
+            master_dataframe.to_csv(MASTER_DF_NAME, index=False)
+            df.to_csv(contest_datafile, index=False)
 
-        # TODO: Once 'last updated' functionality is added, add parameter skipfooter=1
-        df = pd.read_csv(infile)
+            # return a pd.DataFrame for contest dataframe so the contest start script
+            # can then utilise that information.
+            return df
+
+    elif update_mode == 'update':
+        # Read contest_dataframe from file
+        df = pd.read_csv(contest_datafile, skipfooter=1, engine='python')
 
         for i in range(len(df.index)):
             rsn = df.at[i, 'RSN']
             try:
                 usr = hs.get_user(rsn)
             except ValueError:
-                # If we get a ValueError for a user already in df, they've probably
-                # changed their name.
-                log_message('User {} not found! Potential name change detected!'.format(rsn))
+                # If a RSN that's already in the contest dataframe isn't found, they likely
+                # changes their name, so flag this in the log so their new name can be
+                # edited into the datafile
+                log_message(f'User {rsn} not found! Potential name change detected!',
+                            log=logfile)
                 continue
 
+            # This line is mostly just present to prevent an IDE warning since
+            # if score is not defined below, the update can't run
+            score = 0
+
+            # Queries user's highscores entry for target
             prev = int(df.at[i, 'Start'])
-            score = hs.query_skill_xp(usr, skill)
+            if game_mode == 'skill':
+                score = int(hs.query_skill_xp(usr, target))
+            elif game_mode == 'activity':
+                score = int(hs.query_activity_score(usr, target))
+            elif game_mode == 'boss':
+                score = int(hs.query_boss_kc(usr, target))
+            else:
+                log_message(f'Target {target} not recognized', log=logfile)
 
-            # Preserves manual edits to starting values in the case that starting
-            # score was too low to be listed on hiscores.
-
-            # TODO Adjust this value to work for XP hiscores
-            if score < 2411:
+            # Preserve any manual edits made to the contest data in the case that a user's
+            # score was too low to appear on the highscores
+            if score < prev:
                 score = prev
-            gained = int(score) - int(prev)
 
-            # Update DataFrame row with these new values
+            # Calculate user's progress and update their row in the contest dataframe
+            gained = int(score) - int(prev)
             df.at[i, 'Current'] = score
             df.at[i, 'Gained'] = gained
 
-        # reorder rows by value in 'Gained' and update indices
+            # Append a row for user in master dataframe with their updated highscores entries
+            master_dataframe.loc[len(
+                master_dataframe)] = hs.get_all_entries(rsn, update_number)
+
+        # Rank the rows in contest dataframe and reset indices.
         df = df.sort_values(by=['Gained'], ascending=False).reset_index(drop=True)
 
-        return df
+        # Pass pd.DataFrames for master dataframe and contest dataframe back to the contest
+        # update script.
+        return master_dataframe, df
 
-    elif mode == 'end':
-        # Expect infile to be CSV of rankings and load into df
-
-        # TODO: Once 'last updated' functionality is added, add parameter skipfooter=1
-        df = pd.read_csv(infile)
+    elif update_mode == 'end':
+        # Read contest dataframe from file
+        df = pd.read_csv(contest_datafile, skipfooter=1, engine='python')
 
         for i in range(len(df.index)):
             rsn = df.at[i, 'RSN']
             try:
                 usr = hs.get_user(rsn)
             except ValueError:
-                # If we get a ValueError for a user already in df, they've probably
-                # changed their name.
-                log_message('User {} not found! Potential name change detected!'.format(rsn))
+                # If a RSN that's already in the contest dataframe isn't found, they likely
+                # changes their name, so flag this in the log so their new name can be
+                # edited into the datafile
+                log_message(f'User {rsn} not found! Potential name change detected!',
+                            log=logfile)
                 continue
 
+            # This line is mostly just present to prevent an IDE warning since
+            # if score is not defined below, the update can't run
+            score = 0
+
+            # Queries user's highscores entry for target
             prev = int(df.at[i, 'Start'])
-            score = hs.query_skill_xp(usr, skill)
+            if game_mode == 'skill':
+                score = int(hs.query_skill_xp(usr, target))
+            elif game_mode == 'activity':
+                score = int(hs.query_activity_score(usr, target))
+            elif game_mode == 'boss':
+                score = int(hs.query_boss_kc(usr, target))
+            else:
+                log_message(f'Target {target} not recognized', log=logfile)
 
-            # Preserves manual edits to starting values in the case that starting
-            # score was too low to be listed on highscores.
-
-            # TODO Adjust this value to work for XP highscores
-            if score < 2411:
-                score = prev
-            gained = int(score) - int(prev)
-
-            # Update DataFrame row with these new values
-            df.at[i, 'Current'] = score
-            df.at[i, 'Gained'] = gained
-
-        # reorder rows by value in 'Gained' and update indices
-        df = df.sort_values(by=['Gained'], ascending=False).reset_index(drop=True)
-
-        return df
-
-    else:
-        # mode not recognized or unsupported
-        log_message('Mode {} not recognized or not supported!'.format(mode))
-
-
-def update_kc(infile, boss, mode):
-    """ Fetches KC values from Highscores and updates the dataframe of these values
-
-    :param infile: File used as input. For mode='start', this expects a .txt
-    with one username per line. For mode='update' and mode='end', expects a
-    CSV representation of a dataframe with columns {'RSN', 'Start', 'Current,
-    'Gained'}
-    :param boss: Str of the boss we're checking in the contest.
-    :param mode: {'start': Takes list of group members and creates an initial
-    listing of their starting KC values, then exports the results as a CSV.
-                  'update': Loads CSV of rankings to dataframe, updates current KC and
-    calculates gains, then reorders by rank and returns the dataframe.
-                  'end': Loads CSV of rankings to dataframe, updates current KC and
-    calculates gains, then reorders by rank and returns the dataframe.}
-                    }
-    :return: Pandas dataframe to be exported by the calling function, potentially
-    after further manipulation.
-    """
-    if mode == 'start':
-        # Expect infile to be user list and make array of users
-        # TODO: Replace this with CSV handling to be able to use files direct
-        # TODO: from the Clanmate Exporter plugin.
-
-        with open(infile) as file:
-            users = file.readlines()
-            users = [line.rstrip() for line in users]
-
-        # Create dataframe with each user's RSN and starting KC
-        df = pd.DataFrame(columns=['RSN', 'Start', 'Current', 'Gained'])
-        for rsn in users:
-            try:
-                usr = hs.get_user(rsn)
-
-            # In the case that there is no highscores listing for user, skip them.
-            except ValueError:
-                log_message('User {} not found on highscores.'.format(rsn))
-                continue
-            score = hs.query_boss_kc(usr, boss)
-
-            # For players found in highscores that aren't on hs for boss, change
-            # score from -1 to 0
-            if score < 0:
-                score = 0
-
-            # Add user record to dataframe
-            df.loc[len(df.index)] = [rsn, score, score, 0]
-
-        # Export dataframe to file
-        df.to_csv(FILE_NAME + '.csv', index=False)
-
-        return df
-
-    elif mode == 'update':
-        # Expect infile to be CSV of rankings and load into df
-
-        # TODO: Once 'last updated' functionality is added, add parameter skipfooter=1
-        df = pd.read_csv(infile)
-
-        for i in range(len(df.index)):
-            rsn = df.at[i, 'RSN']
-            try:
-                usr = hs.get_user(rsn)
-            except ValueError:
-                # If we get a ValueError for a user already in df, they've probably
-                # changed their name.
-                log_message('User {} not found! Potential name change detected!'.format(rsn))
-                continue
-
-            prev = int(df.at[i, 'Start'])
-            score = hs.query_boss_kc(usr, boss)
-
-            # Preserves manual edits to starting values in the case that starting
-            # score was too low to be listed on hiscores.
+            # Preserve any manual edits made to the contest data in the case that a user's
+            # score was too low to appear on the highscores
             if score < 50:
                 score = prev
-            gained = int(score) - int(prev)
 
-            # Update DataFrame row with these new values
+            # Calculate user's progress and update their row in the contest dataframe
+            gained = int(score) - int(prev)
             df.at[i, 'Current'] = score
             df.at[i, 'Gained'] = gained
 
-        # reorder rows by value in 'Gained' and update indices
+            # Append a row for user in master dataframe with their updated highscores entries
+            master_dataframe.loc[len(
+                master_dataframe)] = hs.get_all_entries(rsn, update_number)
+
+        # Rank the rows in contest dataframe and reset indices.
         df = df.sort_values(by=['Gained'], ascending=False).reset_index(drop=True)
 
-        return df
-
-    elif mode == 'end':
-        # Expect infile to be CSV of rankings and load into df
-
-        # TODO: Once 'last updated' functionality is added, add parameter skipfooter=1
-        df = pd.read_csv(infile)
-
-        for i in range(len(df.index)):
-            rsn = df.at[i, 'RSN']
-            try:
-                usr = hs.get_user(rsn)
-            except ValueError:
-                # If we get a ValueError for a user already in df, they've probably
-                # changed their name.
-                log_message('User {} not found! Potential name change detected!'.format(rsn))
-                continue
-
-            prev = int(df.at[i, 'Start'])
-            score = hs.query_boss_kc(usr, boss)
-
-            # Preserves manual edits to starting values in the case that starting
-            # score was too low to be listed on highscores.
-            if score < 50:
-                score = prev
-            gained = int(score) - int(prev)
-
-            # Update DataFrame row with these new values
-            df.at[i, 'Current'] = score
-            df.at[i, 'Gained'] = gained
-
-        # reorder rows by value in 'Gained' and update indices
-        df = df.sort_values(by=['Gained'], ascending=False).reset_index(drop=True)
-
-        return df
+        # Pass pd.DataFrames for master dataframe and contest dataframe back to the contest
+        # update script.
+        return master_dataframe, df
 
     else:
-        # mode not recognized or unsupported
-        log_message('Mode {} not recognized or not supported!'.format(mode))
+        log_message(f'Update mode "{update_mode}" not recognized', log=logfile)

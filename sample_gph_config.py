@@ -8,7 +8,7 @@ Then rename file to 'gph_config.py' before running.
 
 # ---------------Bot info---------------
 # Version number for logging purposes
-GPH_VERSION = 'v0.3.3 alpha'
+GPH_VERSION = 'v0.4 beta'
 # Bot name to include in JSON payload
 BOT_NAME = 'Gold Partyhat'
 
@@ -52,3 +52,7 @@ SKILL = 'runecraft'
 BOSS = 'tempoross'
 # File name to use for log file
 LOG_NAME = 'gph-log.txt'
+# File name for the master dataframe
+MASTER_DF_NAME = 'master_dataframe.csv'
+# Link to default bot avatar
+AVATAR_URL = 'https://github.com/cdfisher/gold-partyhat/blob/master/resources/icon.png?raw=true'

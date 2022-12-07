@@ -17,7 +17,6 @@ ENV/
 # Various files / backups
 server/
 utils/
-wh_test.py
 group.txt
 group.csv
 raw-group.txt
@@ -40,6 +39,7 @@ coverage.xml
 *.cover
 .hypothesis/
 test/
+*test*.sh
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

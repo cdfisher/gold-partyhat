@@ -16,6 +16,7 @@ Example call for a contest:
 "python update_contest.py 'CFF965D0' 'Attack test contest'"
 """
 import argparse
+import matplotlib.pyplot as plt
 from gph_config import *
 from data_updater import *
 from os import remove
@@ -85,8 +86,10 @@ participants = set()
 
 msg = f'{title} top {top_n} (so far)\n'
 
-# TODO Implement top_n progress graphing
 
+# TODO See if I can partially wrap creation of the progress file
+# TODO into these next two loops
+# TODO See if I can wrap creation of graph_data into this chunk of code
 # Make a list of the top_n participants
 for i in range(top_n):
     rsn = contest_df.at[i, 'RSN']
@@ -106,10 +109,61 @@ for i in range(top_n, len(contest_df.index)):
     else:
         break
 
+# Create progress graph to send in Discord
+
+# Collect data on the progress of the top_n in a 2D list
+ranked_users = []
+graph_data = [ranked_users]
+for i in range(top_n):
+    rsn = contest_df.at[i, 'RSN']
+    ranked_users.append(rsn)
+    player_data = []
+    for j in range(update_number+1):
+        row = master_df.loc[(master_df['RSN'] == rsn) & (master_df['Update number'] == j)]
+        player_data.append(row.iloc[0]['overall'])
+    start_value = player_data[0]
+    for k in range(len(player_data)):
+        player_data[k] = player_data[k] - start_value
+    graph_data.append(player_data)
+graph_data[0] = ranked_users
+
+update_list = []
+for i in range(update_number+1):
+    update_list.append(i)
+
+# Set up Pyplot to customize the appearance of the graph
+text_color = '#99AAB5'
+bg_color = '#333333'
+plot_markers = ['o', '^', 's', 'X', 'D', 'v', '*', 'p']
+
+with plt.rc_context({'axes.spines.right': False, 'axes.spines.top': False, 'axes.facecolor': bg_color,
+                     'axes.edgecolor': text_color, 'axes.labelcolor': text_color, 'axes.titlecolor': text_color,
+                     'xtick.color': text_color, 'ytick.color': text_color, 'legend.edgecolor': text_color,
+                     'legend.fancybox': True, 'figure.facecolor': bg_color, 'figure.edgecolor': text_color,
+                     'figure.titlesize': 'large'}):
+
+    # Add lines for each of the top_n to the graph
+    for i in range(len(graph_data[0])):
+        plt.plot(update_list, graph_data[i+1], label=graph_data[0][i], marker=plot_markers[i])
+
+    # More plot setup
+    plotname = f'{title} top {top_n} progress'
+    plt.xticks(update_list)
+    plt.xlabel('Update number')
+    plt.ylabel(f'{units} gained')
+    plt.title(plotname)
+    plt.legend(facecolor='#36393F', labelcolor='#99AAB5')
+
+    # Save plot to a file so it can be sent to Discord
+    plotfile = plotname.replace(' ', '-') + f'-update-{update_number}.png'
+    plotfile = plotfile.lower()
+    plt.tight_layout()
+    plt.savefig(plotfile)
+
 # Make file listing the ranks of everyone who has increased
 # their score since the start of the contest.
-fname = datafile[:-4] + f'-update-{update_number}-gains.txt'
-with open(fname, 'w') as file:
+textfile = datafile[:-4] + f'-update-{update_number}-gains.txt'
+with open(textfile, 'w') as file:
     file.write(f'{title} progress update #{update_number}\n'
                f'------------------------------------------\n')
     file.write(f'Rank: RSN:            {units:>6} gained\n')
@@ -120,7 +174,7 @@ with open(fname, 'w') as file:
             break
         file.write(f'{i+1:>3})  {rsn:<12}     {gain:>12}\n')
 
-log_message(f'Progress file {fname} created successfully.', log=logfile)
+log_message(f'Progress file {textfile} created successfully.', log=logfile)
 
 # List participants who have reached the contest threshold
 par_len = len(participants)
@@ -158,8 +212,14 @@ log_message('Contest successfully updated.', log=logfile)
 # message via a webhook.
 if not silent:
     wh = WebhookHandler()
-    wh.send_file(msg, filename=fname)
+
+    # Using with resolves an issue where the files sent to Discord using add_file() could not be removed
+    with open(plotfile, 'rb') as pf:
+        wh.add_file(pf, plotfile)
+        wh.send_file(msg, filename=textfile)
 
 
-# Remove the text file with everyone's progress
-remove(fname)
+# Remove the text file with everyone's progress and the plot image after sending them to
+# Discord
+remove(textfile)
+remove(plotfile)

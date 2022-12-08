@@ -24,7 +24,9 @@ extension.  Defaults to (title.lower.replace(' ', '-') + '-log')
 @:arg --interval: int Optional argument to set the interval at which the contest updates, in hours. Defaults to 6.
 Included for future use by a planned feature to automatically create cronjobs. Not yet used.
 @:arg --silent, -s: bool Optional argument to disable sending of messages to Discord when running contest
-scripts. Defaults to False
+scripts for the duration of the contest. Defaults to False
+@:arg --quiet, -q: bool Runs script without sending messages to Discord, but does not stop other updates run for
+this contest from sending messages. Defaults to False
 
 Example call for a contest:
 
@@ -60,7 +62,11 @@ parser.add_argument('--raffle_mode', type=str, choices=['classic', 'top_particip
 parser.add_argument('--datafile', type=str, help='File name of where to save contest data, excluding the extension.')
 parser.add_argument('--logfile', type=str, help='File name of where the logs will be saved, excluding the extension.')
 parser.add_argument('--interval', type=int, default=6, help='The number of hours between updates.')
-parser.add_argument('-s', '--silent', help='Runs script without sending messages to Discord', action='store_true')
+parser.add_argument('-s', '--silent', help='Runs script without sending messages to Discord,'
+                                           ' and persists for the whole contest.', action='store_true')
+parser.add_argument('-q', '--quiet', help='Runs script without sending messages to Discord, but does not stop '
+                                          'other updates run for this contest from sending messages.',
+                    action='store_true')
 
 # Assign variables from args and use defaults if no value given
 args = parser.parse_args()
@@ -87,6 +93,7 @@ else:
     logfile = args.logfile + '.txt'
 interval = args.interval
 silent = args.silent
+quiet = args.quiet
 
 # Generate an 8 character code as a contest identifier. Not currently used but
 # implemented for a planned future feature.
@@ -131,7 +138,7 @@ else:
 
 # Run the start of contest procedure and create the initial contest dataframe.
 contest_df = update_entry(group, mode, target, 'start', update_number,
-                          master_df, logfile, datafile)
+                          master_df, logfile, datafile, contest_id)
 
 n_users = len(contest_df.index)
 
@@ -161,7 +168,7 @@ with open(datafile, 'a') as file:
 # If the --silent flag was used, don't send anything to Discord. Otherwise, send
 # a start of contest message and the list of players' starting scores as a Discord
 # message via a webhook.
-if not silent:
+if not (silent | quiet):
     wh = WebhookHandler()
     wh.send_file(msg, filename=fname)
 

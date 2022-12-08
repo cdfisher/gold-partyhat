@@ -183,15 +183,14 @@ def fetch_all_bosses(rsn, user):
     return msg
 
 
-def get_all_entries(rsn: str) -> list:
+def get_all_entries(usr: Highscores) -> list:
     """Fetches a list of all OSRS highscores entries for user rsn
 
-    :param rsn: String of player's OSRS username.
+    :param usr: Highscores object pointing to a given user
     :return: list of all entries on a player's OSRS highscores page, with entries that are not
     found being set to zero
     """
     outlist = []
-    usr = get_user(rsn)
     for i in range(len(SKILLS)):
         xp = query_skill_xp(usr, SKILLS[i])
         if xp <= 0:

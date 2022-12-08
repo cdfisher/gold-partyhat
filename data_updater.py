@@ -79,7 +79,7 @@ def update_entry(infile: str, game_mode: str, target: str, update_mode: str,
                 df.loc[len(df.index)] = [rsn, score, score, 0]
 
                 # Append a row for user in master dataframe
-                hs_entries = hs.get_all_entries(rsn)
+                hs_entries = hs.get_all_entries(usr)
                 now = datetime.now()
                 timestamp = now.strftime('[%d %b %Y - %H:%M:%S]')
                 entry_array = [timestamp, update_number, rsn] + hs_entries
@@ -136,7 +136,7 @@ def update_entry(infile: str, game_mode: str, target: str, update_mode: str,
             df.at[i, 'Gained'] = gained
 
             # Append a row for user in master dataframe with their updated highscores entries
-            hs_entries = hs.get_all_entries(rsn)
+            hs_entries = hs.get_all_entries(usr)
             now = datetime.now()
             timestamp = now.strftime('[%d %b %Y - %H:%M:%S]')
             entry_array = [timestamp, update_number, rsn] + hs_entries
@@ -192,7 +192,7 @@ def update_entry(infile: str, game_mode: str, target: str, update_mode: str,
             df.at[i, 'Gained'] = gained
 
             # Append a row for user in master dataframe with their updated highscores entries
-            hs_entries = hs.get_all_entries(rsn)
+            hs_entries = hs.get_all_entries(usr)
             now = datetime.now()
             timestamp = now.strftime('[%d %b %Y - %H:%M:%S]')
             entry_array = [timestamp, update_number, rsn] + hs_entries

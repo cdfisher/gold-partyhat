@@ -24,13 +24,17 @@ it and resolves a few bugs that were preventing full functionality.
 
 `osrs-highscores @ git+https://github.com/cdfisher/osrs_highscores`
 
+`matplotlib~=3.5.3`
 #### Running on a Raspberry Pi
 `numpy == 1.23.2`
+
+`requests ~= 2.28.1`
 
 `pandas ~= 1.4.3`
 
 `osrs-highscores @ git+https://github.com/cdfisher/osrs_highscores`
 
+`matplotlib~=3.5.3`
 ### Running the bot
 
 For the time being, please see the docstrings for `start_contest.py`, 
@@ -39,6 +43,14 @@ scripts.
 
 ### Changelog
 Starting with v0.4, any significant changes will be listed here.
+
+#### v0.4.1
+
+- Adds graphing of the top players' progress with each contest update
+- Includes rewrites of certain OSRS Highscores API-related functions
+in order to be significantly cleaner and more idiomatic
+- Corrects a design error introduced in v0.4 which caused contest updates to 
+run significantly more slowly.
 
 #### v0.4:
 

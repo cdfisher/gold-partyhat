@@ -16,12 +16,12 @@ from gph_logging import log_message
 
 
 """Used for updating the master_dataframe"""
-master_colnames = ['Timestamp', 'Update number', 'RSN'] + hs.SKILLS + hs.ACTIVITIES + hs.BOSSES
+master_colnames = ['Timestamp', 'Update number', 'Update source', 'RSN'] + hs.SKILLS + hs.ACTIVITIES + hs.BOSSES
 
 
 def update_entry(infile: str, game_mode: str, target: str, update_mode: str,
                  update_number: int, master_dataframe: pd.DataFrame, logfile: str,
-                 contest_datafile: str):
+                 contest_datafile: str, source_id: str):
     """Creates and updates both contest and master dataframes
 
     :param infile: str: filename of a .txt file listing the players to track with the contest.
@@ -40,6 +40,8 @@ def update_entry(infile: str, game_mode: str, target: str, update_mode: str,
     HS pages over time.
     :param logfile: str denoting where to write log messages.
     :param contest_datafile: str denoting the .csv file where the contest_dataframe is saved.
+    :param source_id: str identifying the source calling the master dataframe to be updated. In most cases,
+    this will be a contest_id
     :return: pd.DataFrame df: the contest_dataframe
     """
     if update_mode == 'start':
@@ -82,7 +84,7 @@ def update_entry(infile: str, game_mode: str, target: str, update_mode: str,
                 hs_entries = hs.get_all_entries(usr)
                 now = datetime.now()
                 timestamp = now.strftime('[%d %b %Y - %H:%M:%S]')
-                entry_array = [timestamp, update_number, rsn] + hs_entries
+                entry_array = [timestamp, update_number, source_id, rsn] + hs_entries
                 master_dataframe.loc[len(
                     master_dataframe)] = entry_array
 
@@ -139,7 +141,7 @@ def update_entry(infile: str, game_mode: str, target: str, update_mode: str,
             hs_entries = hs.get_all_entries(usr)
             now = datetime.now()
             timestamp = now.strftime('[%d %b %Y - %H:%M:%S]')
-            entry_array = [timestamp, update_number, rsn] + hs_entries
+            entry_array = [timestamp, update_number, source_id, rsn] + hs_entries
             master_dataframe.loc[len(
                 master_dataframe)] = entry_array
 
@@ -195,7 +197,7 @@ def update_entry(infile: str, game_mode: str, target: str, update_mode: str,
             hs_entries = hs.get_all_entries(usr)
             now = datetime.now()
             timestamp = now.strftime('[%d %b %Y - %H:%M:%S]')
-            entry_array = [timestamp, update_number, rsn] + hs_entries
+            entry_array = [timestamp, update_number, source_id, rsn] + hs_entries
             master_dataframe.loc[len(
                 master_dataframe)] = entry_array
 

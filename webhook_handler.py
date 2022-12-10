@@ -41,7 +41,7 @@ class WebhookHandler:
         self._files["payload_json"] = (None, json.dumps(data))
         return requests.post(url, files=self._files)
 
-    def send_message(self, msg: str, name=BOT_NAME, avatar=AVATAR_URL):
+    def send_message(self, msg: str, name=BOT_NAME, avatar=AVATAR_URL) -> None:
         self.config_webhook(msg, name)
         self.webhook_data["avatar_url"] = avatar
         response = self.make_post_request(wh_url, self.webhook_data, self._files)
@@ -59,7 +59,7 @@ class WebhookHandler:
             self.webhook_data = {}
             self._files = {}
 
-    def send_file(self, msg: str, filename: str, name=BOT_NAME, avatar=AVATAR_URL):
+    def send_file(self, msg: str, filename: str, name=BOT_NAME, avatar=AVATAR_URL) -> None:
         self.config_webhook(msg, name)
         self.webhook_data["avatar_url"] = avatar
         fdata = open(filename, 'rb')

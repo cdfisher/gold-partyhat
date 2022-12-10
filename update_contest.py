@@ -6,10 +6,17 @@ Additionally, updates a master dataframe that tracks all entries on each user's 
 @:arg contest_id: str 8 character code used as a contest identifier. Not yet used, but implemented
 for use with a planned future feature.
 @:arg title: str The name of the contest.
+@:arg --raffle_winners. int Updates the number of participation prizes available if different from what was
+given at contest start.
 @:arg --datafile: str. Optional flag to set the name of the file where contest data is stored, not including a file
 extension.  Defaults to title.lower.replace(' ', '-')
 @:arg --logfile: str. Optional flag to set the name of the file where log messages are stored, not including a file
 extension.  Defaults to (title.lower.replace(' ', '-') + '-log')
+@:arg --silent, -s: bool Optional argument to disable sending of messages to Discord when running contest
+scripts for the duration of the contest. Defaults to False
+@:arg --quiet, -q: bool Runs script without sending messages to Discord, but does not stop other updates run for
+this contest from sending messages. Defaults to False
+
 
 Example call for a contest:
 
@@ -28,13 +35,20 @@ from webhook_handler import WebhookHandler
 parser = argparse.ArgumentParser()
 parser.add_argument('contest_id', type=str, help='Unique contest identifier.')
 parser.add_argument('title', type=str, help='Title of the contest.')
+parser.add_argument('--raffle_winners', type=int, help='Number of participation prizes available.')
 parser.add_argument('--datafile', type=str, help='File name of where to save contest data, excluding the extension.')
 parser.add_argument('--logfile', type=str, help='File name of where the logs will be saved, excluding the extension.')
+parser.add_argument('-s', '--silent', help='Runs script without sending messages to Discord,'
+                                           ' and persists for the whole contest.', action='store_true')
+parser.add_argument('-q', '--quiet', help='Runs script without sending messages to Discord, but does not stop '
+                                          'other updates run for this contest from sending messages.',
+                    action='store_true')
 
 # Assign variables from args and use defaults if no value given
 args = parser.parse_args()
 contest_id = args.contest_id
 title = args.title
+raffle_winners = args.raffle_winners
 if args.datafile is None:
     datafile = title.replace(' ', '-')
     datafile = datafile.lower() + '.csv'
@@ -45,6 +59,8 @@ if args.logfile is None:
     logfile = logfile.lower() + '-log.txt'
 else:
     logfile = args.logfile + '.txt'
+silent = args.silent
+quiet = args.quiet
 
 log_message(f'Updating contest {title}.', log=logfile)
 
@@ -67,12 +83,16 @@ group = str(settings[5])
 top_n = int(settings[6])
 winners = int(settings[7])
 raffle_mode = str(settings[8])
-raffle_winners = int(settings[9])
-silent = bool(settings[10])
+if raffle_winners is None:
+    raffle_winners = int(settings[9])
+if not silent:
+    silent = bool(settings[10])
 start = str(settings[11])
 end = str(settings[12])
 interval = int(settings[13])
 update_number = int(settings[14])
+n_participants = int(settings[15])
+dynamic_prizes = bool(settings[16])
 
 update_number += 1
 
@@ -80,7 +100,8 @@ update_number += 1
 master_df = pd.read_csv(MASTER_DF_NAME)
 
 # Run the contest update procedure and make copies of both dataframes
-master_df, contest_df = update_entry(group, mode, target, 'update', update_number, master_df, logfile, datafile)
+master_df, contest_df = update_entry(group, mode, target, 'update', update_number, master_df, logfile,
+                                     datafile, contest_id)
 
 participants = set()
 
@@ -119,7 +140,8 @@ for i in range(top_n):
     ranked_users.append(rsn)
     player_data = []
     for j in range(update_number+1):
-        row = master_df.loc[(master_df['RSN'] == rsn) & (master_df['Update number'] == j)]
+        row = master_df.loc[(master_df['RSN'] == rsn) & (master_df['Update number'] == j) &
+                            (master_df['Update source'] == contest_id)]
         player_data.append(row.iloc[0]['overall'])
     start_value = player_data[0]
     for k in range(len(player_data)):
@@ -201,7 +223,7 @@ master_df.to_csv(MASTER_DF_NAME, index=False)
 # Create an array of contest settings to save and then append it to datafile
 contest_settings = [contest_id, mode, target, threshold, units, group, top_n, winners,
                     raffle_mode, raffle_winners, silent, start, end, interval,
-                    update_number]
+                    update_number, n_participants, dynamic_prizes]
 with open(datafile, 'a') as file:
     file.write(str(contest_settings))
 
@@ -210,7 +232,7 @@ log_message('Contest successfully updated.', log=logfile)
 # If the --silent flag was used, don't send anything to Discord. Otherwise, send
 # a list of the top_n and the list of players' progress as a Discord
 # message via a webhook.
-if not silent:
+if not (silent | quiet):
     wh = WebhookHandler()
 
     # Using with resolves an issue where the files sent to Discord using add_file() could not be removed

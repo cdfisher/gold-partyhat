@@ -62,7 +62,7 @@ FORMATTED_BOSSES = ['Abyssal Sire', 'Alchemical Hydra', 'Barrows Chests', 'Bryop
                     'Vet\'ion', 'Vorkath', 'Wintertodt', 'Zalcano', 'Zulrah']
 
 
-def get_user(rsn):
+def get_user(rsn: str) -> Highscores:
     """Fetches a given user's highscores entries.
 
     :param rsn: String of player's OSRS username.
@@ -71,7 +71,7 @@ def get_user(rsn):
     return Highscores(rsn)
 
 
-def query_skill_xp(user, skill):
+def query_skill_xp(user: Highscores, skill: str) -> int:
     """ Queries XP listed on user's highscores page.
     :param user: User object for player (as returned by get_user())
     :param skill: String specifying the skill to query (Typically set as SKILL
@@ -87,7 +87,7 @@ def query_skill_xp(user, skill):
         return int(skill_entry.xp)
 
 
-def query_skill_level(user, skill):
+def query_skill_level(user: Highscores, skill: str) -> int:
     """ Queries XP listed on user's highscores page.
     :param user: User object for player (as returned by get_user())
     :param skill: String specifying the skill to query (Typically set as SKILL
@@ -103,7 +103,7 @@ def query_skill_level(user, skill):
         return int(skill_entry.level)
 
 
-def query_activity_score(user, activity):
+def query_activity_score(user: Highscores, activity: str) -> int:
     """ Queries activity scores listed on user's highscores page.
 
         :param user: User object for player (as returned by get_user())
@@ -120,7 +120,7 @@ def query_activity_score(user, activity):
         return int(activity_entry.score)
 
 
-def query_boss_kc(user, boss):
+def query_boss_kc(user: Highscores, boss: str) -> int:
     """ Queries KC listed on user's highscores page.
 
     :param user: User object for player (as returned by get_user())
@@ -141,7 +141,7 @@ def query_boss_kc(user, boss):
 # TODO are more broadly useful. Requires changes to the Clockwork Penguin bot.
 
 
-def fetch_all_skills(rsn, user):
+def fetch_all_skills(rsn: str, user: Highscores) -> str:
     """Writes list of user's XP in all skills to string and returns.
 
     :param rsn: String of player's OSRS username.
@@ -155,7 +155,7 @@ def fetch_all_skills(rsn, user):
     return msg
 
 
-def fetch_all_activities(rsn, user):
+def fetch_all_activities(rsn: str, user: Highscores) -> str:
     """Writes list of user's score in all activities to string and returns.
 
     :param rsn: String of player's OSRS username.
@@ -169,7 +169,7 @@ def fetch_all_activities(rsn, user):
     return msg
 
 
-def fetch_all_bosses(rsn, user):
+def fetch_all_bosses(rsn: str, user: Highscores) -> str:
     """Writes list of user's KC for all bosses to string and returns.
 
     :param rsn: String of player's OSRS username.

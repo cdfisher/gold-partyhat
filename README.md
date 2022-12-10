@@ -44,6 +44,12 @@ scripts.
 ### Changelog
 Starting with v0.4, any significant changes will be listed here.
 
+#### v0.4.2
+
+- Reworks contest parameters to make it significantly simpler to start a contest from the command line
+- Adds new optional flags `--force_id`, `--participants`, and `--dynamic_prizes`
+- Corrects a potential issue with row id collision in the master dataframe
+
 #### v0.4.1
 
 - Adds graphing of the top players' progress with each contest update

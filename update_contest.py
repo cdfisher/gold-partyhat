@@ -133,7 +133,8 @@ for i in range(top_n):
     ranked_users.append(rsn)
     player_data = []
     for j in range(update_number+1):
-        row = master_df.loc[(master_df['RSN'] == rsn) & (master_df['Update number'] == j)]
+        row = master_df.loc[(master_df['RSN'] == rsn) & (master_df['Update number'] == j) &
+                            (master_df['Update source'] == contest_id)]
         player_data.append(row.iloc[0]['overall'])
     start_value = player_data[0]
     for k in range(len(player_data)):

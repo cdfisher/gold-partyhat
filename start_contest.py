@@ -2,7 +2,6 @@
 Script to start tracking group members for a skill-, boss-, or activity-based competition.
 Also updates a master dataframe that tracks all entries on each user's highscores page.
 
-@:arg mode: str in {'skill', 'boss', 'activity'} denoting what type of target is being tracked.
 @:arg target: str in hs.SKILLS, hs.ACTIVITIES, or hs.BOSSES denoting the specific target to track.
 @:arg title: str The name of the contest.
 @:arg threshold: int The minimum increase in score a user needs to gain during the contest in order to be
@@ -43,8 +42,6 @@ from webhook_handler import WebhookHandler
 
 # Establish and parse command line arguments
 parser = argparse.ArgumentParser()
-parser.add_argument('mode', type=str, choices=['skill', 'boss', 'activity'], help='Whether to track a skill, '
-                                                                                  'a boss, or an activity.')
 parser.add_argument('target', type=str, help='The goal to track with this contest.')
 parser.add_argument('title', type=str, help='Title of the contest.')
 parser.add_argument('threshold', type=int, help='The amount of XP, KC, or score needed to be counted as a participant.')
@@ -70,7 +67,6 @@ parser.add_argument('-q', '--quiet', help='Runs script without sending messages 
 
 # Assign variables from args and use defaults if no value given
 args = parser.parse_args()
-mode = args.mode
 target = args.target
 title = args.title
 threshold = args.threshold
@@ -94,6 +90,16 @@ else:
 interval = args.interval
 silent = args.silent
 quiet = args.quiet
+
+mode = ''
+if target in hs.SKILLS:
+    mode = 'skill'
+elif target in hs.ACTIVITIES:
+    mode = 'activity'
+elif target in hs.BOSSES:
+    mode = 'boss'
+else:
+    log_message(f'Target \'{target}\' not found, unable to set mode', log=logfile)
 
 # Generate an 8 character code as a contest identifier. Not currently used but
 # implemented for a planned future feature.

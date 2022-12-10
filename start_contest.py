@@ -4,16 +4,17 @@ Also updates a master dataframe that tracks all entries on each user's highscore
 
 @:arg target: str in hs.SKILLS, hs.ACTIVITIES, or hs.BOSSES denoting the specific target to track.
 @:arg title: str The name of the contest.
-@:arg threshold: int The minimum increase in score a user needs to gain during the contest in order to be
-considered a participant at the end.
-@:arg group: str The name of the text file listing group members to track, excluding the file extension.
-@:arg top_n: int The number of top participants to list when running updates
-@:arg winners: int The number of contest winners.
-@:arg raffle_winners: int The number of participation prizes available.
 @:arg start: str representation of a datetime object in the form '[DD MM YYYY - HH:MM]' to mark the start of the
 contest. Included for future use by a planned feature to automatically create cronjobs. Not yet used.
 @:arg end: str representation of a datetime object in the form '[DD MM YYYY - HH:MM]' to mark the end of the
 contest. Included for future use by a planned feature to automatically create cronjobs. Not yet used.
+@:arg group: str The name of the text file listing group members to track, excluding the file extension.
+@:arg --force_id: str Manually sets contest_id to a given value. Otherwise defaults to generating an ID value.
+@:arg --threshold: int The minimum increase in score a user needs to gain during the contest in order to be
+considered a participant at the end. Default value: 100
+@:arg --top_n: int The number of top participants to list when running updates. Default value: 5
+@:arg --winners: int The number of contest winners. Default value: 3
+@:arg --raffle_winners: int The number of participation prizes available. Default value: 3
 @:arg --raffle_mode: str in {'classic', 'top_participants'}. Optional flag defaulting to 'top_participants' used
 to set how the end of contest raffle works.
 @:arg --datafile: str. Optional flag to set the name of the file where contest data is stored, not including a file
@@ -29,8 +30,8 @@ this contest from sending messages. Defaults to False
 
 Example call for a contest:
 
-"python start_contest.py 'skill' 'attack' 'Attack test contest' 5000 'my_group' 5 3 3
- '[01 12 2022 - 19:00]' '[08 12 2022 - 19:00]'"
+"python start_contest.py 'attack' 'Attack test contest' '[01 12 2022 - 19:00]' '[08 12 2022 - 19:00]' 'group'
+    --threshold 5000"
 """
 import os
 import argparse
@@ -44,18 +45,30 @@ from webhook_handler import WebhookHandler
 parser = argparse.ArgumentParser()
 parser.add_argument('target', type=str, help='The goal to track with this contest.')
 parser.add_argument('title', type=str, help='Title of the contest.')
-parser.add_argument('threshold', type=int, help='The amount of XP, KC, or score needed to be counted as a participant.')
-parser.add_argument('group', type=str, help='Name of the text file where group members are listed, excluding the'
-                                            'file extension.')
-parser.add_argument('top_n', type=int, help='The number of top participants to list when updating the contest.')
-parser.add_argument('winners', type=int, help='The number of contest winners.')
-parser.add_argument('raffle_winners', type=int, help='The number of participation prizes available.')
 parser.add_argument('start', type=str, help='Timestamp marking the start of the contest, '
                                             'in the form "[DD MM YYYY - HH:MM]."')
 parser.add_argument('end', type=str, help='Timestamp marking the end of the contest, '
                                           'in the form "[DD MM YYYY - HH:MM]."')
+parser.add_argument('group', type=str, help='Name of the text file where group members are listed, excluding the'
+                                            'file extension.')
+parser.add_argument('--force_id', nargs='?', default='', type=str, help='Set the contest ID to be a specific value '
+                                                                      'instead of an automatically generated one.')
+parser.add_argument('--threshold', nargs='?', default=THRESHOLD, type=int, help='The amount of XP, KC, or score needed to be '
+                                                                       'counted as a participant.')
+parser.add_argument('--top_n', nargs='?', default=TOP_N, type=int, help='The number of top participants to list when updating'
+                                                                  ' the contest.')
+parser.add_argument('--winners', nargs='?', default=WINNERS, type=int, help='The number of contest winners.')
+parser.add_argument('--raffle_winners', nargs='?', default=3, type=int, help='The number of participation prizes'
+                                                                           ' available.')
 parser.add_argument('--raffle_mode', type=str, choices=['classic', 'top_participants'], default='top_participants',
                     help='The mode to use at the end of the contest to draw participation prizes.')
+parser.add_argument('--participants', nargs='?', default=N_PARTICIPANTS, type=int, help='The number of participants to '
+                                                                                        'include in the end of contest '
+                                                                                        'raffle if raffle_mode = '
+                                                                                        '"top_participants"')
+parser.add_argument('--dynamic_prizes', help='Determine the number of raffle prizes given out when using raffle_mode'
+                                             'classic based on number of participants using '
+                                             'n = 3 + floor(participants / 10)', action='store_true')
 parser.add_argument('--datafile', type=str, help='File name of where to save contest data, excluding the extension.')
 parser.add_argument('--logfile', type=str, help='File name of where the logs will be saved, excluding the extension.')
 parser.add_argument('--interval', type=int, default=6, help='The number of hours between updates.')
@@ -69,14 +82,17 @@ parser.add_argument('-q', '--quiet', help='Runs script without sending messages 
 args = parser.parse_args()
 target = args.target
 title = args.title
-threshold = args.threshold
+start = args.start
+end = args.end
 group = args.group + '.txt'
+contest_id = args.force_id
+threshold = args.threshold
 top_n = args.top_n
 winners = args.winners
 raffle_winners = args.raffle_winners
-start = args.start
-end = args.end
 raffle_mode = args.raffle_mode
+n_participants = args.participants
+dynamic_prizes = args.dynamic_prizes
 if args.datafile is None:
     datafile = title.replace(' ', '-')
     datafile = datafile.lower() + '.csv'
@@ -91,30 +107,17 @@ interval = args.interval
 silent = args.silent
 quiet = args.quiet
 
+# Set default value of contest units and mode depending on the type of target
 mode = ''
+units = ''
 if target in hs.SKILLS:
     mode = 'skill'
-elif target in hs.ACTIVITIES:
-    mode = 'activity'
+    units = 'XP'
 elif target in hs.BOSSES:
     mode = 'boss'
-else:
-    log_message(f'Target \'{target}\' not found, unable to set mode', log=logfile)
-
-# Generate an 8 character code as a contest identifier. Not currently used but
-# implemented for a planned future feature.
-contest_id = str(sha1((mode + target + title + start + end).encode('utf-8')))[-9:-1]
-
-units = ''
-
-update_number = 0
-
-# Set units appropriate to the contest's target
-if mode == 'boss':
     units = 'KC'
-elif mode == 'skill':
-    units = 'XP'
-elif mode == 'activity':
+elif target in hs.ACTIVITIES:
+    mode = 'activity'
     if target == 'league_points' or 'bounty_hunter' in target:
         units = 'points'
     elif 'clue' in target:
@@ -126,9 +129,16 @@ elif mode == 'activity':
     elif target == 'rifts_closed':
         units = 'rifts closed'
     else:
-        log_message(f'Activity "{target}" not recognized.', log=logfile)
+        log_message(f'Activity "{target}" not recognized, unable to set contest units.', log=logfile)
 else:
-    log_message(f'Mode {mode} not recognized.', log=logfile)
+    log_message(f'Target \'{target}\' not found, unable to set contest mode.', log=logfile)
+
+# If contest ID is not manually set with --force_id, generate an 8 character code as a contest
+# identifier. Not currently used but implemented for a planned future feature.
+if not contest_id:
+    contest_id = str(sha1((mode + target + title + start + end).encode('utf-8')))[-9:-1]
+
+update_number = 0
 
 # Start building start-of-contest message to send to Discord
 msg = f'Running {BOT_NAME} {GPH_VERSION}\n'
@@ -165,7 +175,7 @@ log_message(f'Competition started successfully. Tracking {n_users} '
 # Create an array of contest settings to save and then append it to datafile
 contest_settings = [contest_id, mode, target, threshold, units, group, top_n, winners,
                     raffle_mode, raffle_winners, silent, start, end, interval,
-                    0]
+                    0, n_participants, dynamic_prizes]
 with open(datafile, 'a') as file:
     file.write(str(contest_settings))
 

@@ -8,6 +8,8 @@ Additionally, updates a master dataframe that tracks all entries on each user's 
 @:arg contest_id: str 8 character code used as a contest identifier. Not yet used, but implemented
 for use with a planned future feature.
 @:arg title: str The name of the contest.
+@:arg --raffle_winners. int Updates the number of participation prizes available if different from what was
+given at contest start.
 @:arg --datafile: str. Optional flag to set the name of the file where contest data is stored, not including a file
 extension.  Defaults to title.lower.replace(' ', '-')
 @:arg --logfile: str. Optional flag to set the name of the file where log messages are stored, not including a file
@@ -28,6 +30,7 @@ import matplotlib.pyplot as plt
 from gph_config import *
 from data_updater import *
 from os import remove
+from math import floor
 from ast import literal_eval
 from gph_logging import log_message
 from webhook_handler import WebhookHandler
@@ -36,6 +39,7 @@ from webhook_handler import WebhookHandler
 parser = argparse.ArgumentParser()
 parser.add_argument('contest_id', type=str, help='Unique contest identifier.')
 parser.add_argument('title', type=str, help='Title of the contest.')
+parser.add_argument('--raffle_winners', type=int, help='Number of participation prizes available.')
 parser.add_argument('--datafile', type=str, help='File name of where to save contest data, excluding the extension.')
 parser.add_argument('--logfile', type=str, help='File name of where the logs will be saved, excluding the extension.')
 parser.add_argument('-s', '--silent', help='Runs script without sending messages to Discord,'
@@ -48,6 +52,7 @@ parser.add_argument('-q', '--quiet', help='Runs script without sending messages 
 args = parser.parse_args()
 contest_id = args.contest_id
 title = args.title
+raffle_winners = args.raffle_winners
 if args.datafile is None:
     datafile = title.replace(' ', '-')
     datafile = datafile.lower() + '.csv'
@@ -83,13 +88,16 @@ group = str(settings[5])
 top_n = int(settings[6])
 winners = int(settings[7])
 raffle_mode = str(settings[8])
-raffle_winners = int(settings[9])
+if raffle_winners is None:
+    raffle_winners = int(settings[9])
 if not silent:
     silent = bool(settings[10])
 start = str(settings[11])
 end = str(settings[12])
 interval = int(settings[13])
 update_number = int(settings[14])
+n_participants = int(settings[15])
+dynamic_prizes = bool(settings[16])
 
 update_number += 1
 
@@ -190,6 +198,10 @@ if raffle_mode == 'classic':
     for x in par_srtd:
         msg += x + '\n'
 
+    # If using dynamic prize count, determine the number of prizes to award
+    if dynamic_prizes:
+        raffle_winners = 3 + floor(len(par_srtd) / 10)
+
     if len(par_srtd) <= raffle_winners:
         # If there are fewer participants than prize packages, everyone that reached the threshold gets one
         msg += 'There were enough prizes allotted for everyone listed above as a participant to get one!\n'
@@ -209,8 +221,7 @@ elif raffle_mode == 'top_participants':
     participants = set()
 
     # Make a set of everyone eligible for a prize
-    # TODO incorporate N_PARTICIPANTS into arguments/contest_settings
-    for i in range(winners, winners+N_PARTICIPANTS):
+    for i in range(winners, winners+n_participants):
         gained = contest_df.at[i, 'Gained']
         if gained >= threshold:
             rsn = contest_df.at[i, 'RSN']

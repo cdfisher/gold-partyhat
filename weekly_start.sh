@@ -1,0 +1,7 @@
+#!/bin/bash
+week=`date +%V`
+year=`date +%G`
+year_code=${year:2:2}
+id="WEEK_"$week$year_code
+
+/usr/bin/python3 update_master_dataframe.py $id 'group'

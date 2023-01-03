@@ -69,3 +69,4 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+/ironmen_dictionary.txt

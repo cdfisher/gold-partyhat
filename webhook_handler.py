@@ -22,10 +22,12 @@ else:
 class WebhookHandler:
     _files = {}
     webhook_data = {}
+    embeds = {}
 
-    def __int__(self):
+    def __init__(self):
         self._files = {}
         self.webhook_data = {}
+        self.embeds = []
 
     def add_file(self, file: bytes, filename: str) -> None:
         self._files[f"_{filename}"] = (filename, file)
@@ -33,6 +35,7 @@ class WebhookHandler:
     def config_webhook(self, content: str, username: str) -> None:
         self.webhook_data["content"] = content
         self.webhook_data["username"] = username
+        self.webhook_data["embeds"] = self.embeds
 
     def make_post_request(self, url: str, data: dict, _files: dict) -> requests.post:
         if not bool(self._files):
@@ -46,6 +49,26 @@ class WebhookHandler:
         self.webhook_data["avatar_url"] = avatar
         response = self.make_post_request(wh_url, self.webhook_data, self._files)
         try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as err:
+            log_message(err)
+        else:
+            now = datetime.datetime.now()
+            timestamp = now.strftime('%d %b %Y - %H:%M:%S ')
+            #log_message(f'Text payload delivered with code {response.status_code} '
+                        #f'at {timestamp}')
+            print(f'Text payload delivered with code {response.status_code} '
+            f'at {timestamp}')
+            self.webhook_data = {}
+            self._files = {}
+
+    def send_embed(self, msg: str, embeds: list, name=BOT_NAME, avatar=AVATAR_URL) -> None:
+        self.config_webhook(msg, name)
+        self.webhook_data["avatar_url"] = avatar
+        self.webhook_data["embeds"] = embeds
+        response = self.make_post_request(wh_url, self.webhook_data, self._files)
+        try:
+            print(self.webhook_data)
             response.raise_for_status()
         except requests.exceptions.HTTPError as err:
             log_message(err)

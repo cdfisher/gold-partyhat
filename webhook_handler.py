@@ -55,10 +55,10 @@ class WebhookHandler:
         else:
             now = datetime.datetime.now()
             timestamp = now.strftime('%d %b %Y - %H:%M:%S ')
-            #log_message(f'Text payload delivered with code {response.status_code} '
-                        #f'at {timestamp}')
+            log_message(f'Text payload delivered with code {response.status_code} '
+                        f'at {timestamp}', log=LOG_NAME)
             print(f'Text payload delivered with code {response.status_code} '
-            f'at {timestamp}')
+                  f'at {timestamp}')
             self.webhook_data = {}
             self._files = {}
 
@@ -75,10 +75,10 @@ class WebhookHandler:
         else:
             now = datetime.datetime.now()
             timestamp = now.strftime('%d %b %Y - %H:%M:%S ')
-            #log_message(f'Text payload delivered with code {response.status_code} '
-                        #f'at {timestamp}')
+            log_message(f'Text payload delivered with code {response.status_code} '
+                        f'at {timestamp}', log=LOG_NAME)
             print(f'Text payload delivered with code {response.status_code} '
-            f'at {timestamp}')
+                  f'at {timestamp}')
             self.webhook_data = {}
             self._files = {}
 
@@ -95,10 +95,10 @@ class WebhookHandler:
         else:
             now = datetime.datetime.now()
             timestamp = now.strftime('%d %b %Y - %H:%M:%S ')
-            #log_message(f'File payload delivered with code {response.status_code}'
-                        #f' at {timestamp}')
+            log_message(f'File payload delivered with code {response.status_code}'
+                        f' at {timestamp}', log=LOG_NAME)
             print(f'File payload delivered with code {response.status_code}'
-                        f' at {timestamp}')
+                  f' at {timestamp}')
         fdata.close()
         self.webhook_data = {}
         self._files = {}

@@ -33,12 +33,21 @@ else:
     log_message(f'Master dataframe file {MASTER_DF_NAME} not found by top_players.py!', log=LOG_NAME)
     raise FileNotFoundError(f'Master dataframe file \'{MASTER_DF_NAME}\' not found!')
 
+if os.path.exists(IRON_DICT_NAME):
+    with open(IRON_DICT_NAME, 'r') as iron_file:
+        iron_dict = eval(iron_file.read())
+else:
+
+    iron_file = open(IRON_DICT_NAME, 'w')
+    iron_file.close()
+    iron_dict = dict()
+
+
 # Get maximum value of update_number in master_df for rows where 'Update source' is source_id
 time_df = master_df.loc[(master_df['Update source'] == source_id)].reset_index(drop=True)
 last_update = time_df.max()['Update number']
 
-# TODO implement top EHB gain as well
-gains_df = pd.DataFrame(columns=['RSN', 'XP gained'])
+gains_df = pd.DataFrame(columns=['RSN', 'XP gained', 'EHB gained'])
 
 rsn_array = time_df['RSN'].unique()
 # for each value of rsn in rows with last_update, source_id:
@@ -49,16 +58,38 @@ for rsn in rsn_array:
         # get overall xp gain
         start_xp_idx = time_df[(time_df['RSN'] == rsn) & (time_df['Update number'] == 0)].first_valid_index()
         end_xp_idx = time_df[(time_df['RSN'] == rsn) & (time_df['Update number'] == last_update)].first_valid_index()
-        xp_gain = time_df.at[end_xp_idx, 'overall'] - time_df.at[start_xp_idx, 'overall']
+        xp_gained = time_df.at[end_xp_idx, 'overall'] - time_df.at[start_xp_idx, 'overall']
 
-        # TODO implement EHB gain calculations here
+        # Get list of boss KC at start of time period
+        start_list = (time_df.iloc[start_xp_idx].loc['abyssal_sire':'zulrah']).tolist()
+        # Get list of boss KC at end of time period
+        end_list = (time_df.iloc[end_xp_idx].loc['abyssal_sire':'zulrah']).tolist()
+
+        kc_gained_list = []
+
+        # Calculate KC gained for each boss
+        for i in range(len(start_list)):
+            # kc_diff_list[i] = kc_end_list[i] - kc_start_list[i]
+            kc_gained_list.append(float(end_list[i] - start_list[i]))
+
+        # From array of KC gained, calculate EHB
+        # TODO add an optional argument is_iron to here so we can speed things up
+        if rsn in iron_dict:
+            is_ironman = iron_dict[rsn]
+        else:
+            is_ironman = hs.is_iron(rsn)
+            iron_dict[rsn] = is_ironman
+        ehb_gained = hs.calc_ehb_from_list(rsn, kc_gained_list, is_ironman=is_ironman)
 
         # add [RSN, delta_overall] to a DataFrame gains_df
-        gains_df.loc[len(gains_df)] = [rsn, xp_gain]
+        gains_df.loc[len(gains_df)] = [rsn, xp_gained, ehb_gained]
     # Otherwise there's an error to handle here
     else:
-        print(f'Insufficient data available for player {rsn}.')
+        log_message(f'Insufficient data available for player {rsn}.', log=LOG_NAME)
         continue
+
+with open(IRON_DICT_NAME, 'w') as iron_file:
+    iron_file.write(str(iron_dict))
 
 # sort gains_df by delta_overall
 gains_df = gains_df.sort_values(by=['XP gained'], ascending=False).reset_index(drop=True)
@@ -73,20 +104,30 @@ elif time_period_number[1] == '3':
     suffix = 'rd'
 else:
     suffix = 'th'
+if str(time_period_number)[0] == '0':
+    time_period_number = str(time_period_number)[1:]
 ordinal_time_period = time_period_number + suffix
 
 year = '20' + source_id[-2:]
 
 msg += f'Top XP gained for the {ordinal_time_period} {period} of {year}\n'
 
+# TODO Change this over to send via embeds
+
 # Add top 3 to message
 for i in range(3):
     msg += f'#{i + 1}) {gains_df.at[i, "RSN"]} XP gained: {gains_df.at[i, "XP gained"]}\n'
 
-# TODO implement messaging for EHB as well as XP
 # sort gains_df by delta_EHB
+gains_df = gains_df.sort_values(by=['EHB gained'], ascending=False).reset_index(drop=True)
 # Add top 3 to message
+msg += f'Top EHB gained for the {ordinal_time_period} {period} of {year}\n'
 
+# TODO Change this over to send via embeds
+
+# Add top 3 to message
+for i in range(3):
+    msg += f'#{i + 1}) {gains_df.at[i, "RSN"]} EHB gained: {gains_df.at[i, "EHB gained"]}\n'
 # Send message
 wh = WebhookHandler()
 wh.send_message(msg)

@@ -61,6 +61,132 @@ FORMATTED_BOSSES = ['Abyssal Sire', 'Alchemical Hydra', 'Barrows Chests', 'Bryop
                     'Tombs of Amascut', 'Tombs of Amascut Expert Mode', 'TzKal-Zuk', 'TzTok-Jad', 'Venenatis',
                     'Vet\'ion', 'Vorkath', 'Wintertodt', 'Zalcano', 'Zulrah']
 
+"""EHB_RATES:
+    Dict of bosses and their respective kills per efficient bossing hour.
+    EHB_RATES(boss) returns a tuple of length 2 as a key.
+    key[0] is the EHB rate for main accounts, and key[1] is the rate for ironman accounts.
+    A rate value of -1.0 indicates boss kills do not count toward EHB for that account type.
+    Rates have been sourced from https://wiseoldman.net/rates/ehb
+    """
+EHB_RATES = {'abyssal_sire': (42.0, 32.0),
+             'alchemical_hydra': (27.0, 26.0),
+             'barrows_chests': (-1.0, 18.0),
+             'bryophyta': (-1.0, 9.0),
+             'callisto': (50.0, 30.0),
+             'cerberus': (61.0, 54.0),
+             'chambers_of_xeric': (3.0, 2.8),
+             'chambers_of_xeric_challenge_mode': (2.2, 2.0),
+             'chaos_elemental': (60.0, 48.0),
+             'chaos_fanatic': (100.0, 80.0),
+             'commander_zilyana': (55.0, 25.0),
+             'corporeal_beast': (50.0, 6.5),
+             'crazy_archaeologist': (-1.0, 75.0),
+             'dagannoth_prime': (88.0, 88.0),
+             'dagannoth_rex': (88.0, 88.0),
+             'dagannoth_supreme': (88.0, 88.0),
+             'deranged_archaeologist': (-1.0, 80.0),
+             'general_graardor': (50.0, 25.0),
+             'giant_mole': (100.0, 80.0),
+             'grotesque_guardians': (36.0, 31.0),
+             'hespori': (-1.0, 60.0),
+             'kalphite_queen': (50.0, 30.0),
+             'king_black_dragon': (120.0, 70.0),
+             'kraken': (90.0, 82.0),
+             'kree_arra': (25.0, 22.0),
+             'kril_tsutsaroth': (65.0, 26.0),
+             'mimic': (-1.0, 60.0),
+             'nex': (12.0, 12.0),
+             'nightmare': (14.0, 11.0),
+             'phosanis_nightmare': (7.5, 6.5),
+             'obor': (-1.0, 12.0),
+             'sarachnis': (80.0, 56.0),
+             'scorpia': (130.0, 60.0),
+             'skotizo': (45.0, 38.0),
+             'tempoross': (-1.0, -1.0),
+             'the_gauntlet': (10.0, 10.0),
+             'the_corrupted_gauntlet': (6.5, 6.5),
+             'theatre_of_blood': (3.0, 2.5),
+             'theatre_of_blood_hard_mode': (3.0, 2.4),
+             'thermonuclear_smoke_devil': (125.0, 80.0),
+             'tombs_of_amascut': (2.5, 2.5),
+             'tombs_of_amascut_expert_mode': (2.0, 2.0),
+             'tzkal_zuk': (0.8, 0.8),
+             'tztok_jad': (2.0, 2.0),
+             'venenatis': (50.0, 35.0),
+             'vet_ion': (30.0, 23.0),
+             'vorkath': (32.0, 32.0),
+             'wintertodt': (-1.0, -1.0),
+             'zalcano': (-1.0, -1.0),
+             'zulrah': (35.0, 32.0)}
+
+
+def get_ehb(boss: str, kc: int, mode: str) -> float:
+    """ Returns EHB value for a given boss.
+    :param boss: string from BOSSES in hs_wrapper.py denoting all tracked bosses
+    :param kc: int, player's kill count for :parameter boss
+    :param mode: str with value 'main' or 'iron', denoting which set of rates to use
+    :return: float representing player's efficient hours spent at :parameter boss
+    """
+    if mode == 'main':
+        return kc / EHB_RATES[boss][0]
+    elif mode == 'iron':
+        return kc / EHB_RATES[boss][1]
+    else:
+        print(f'{mode} not recognized\n')
+
+
+def calc_ehb_from_list(rsn: str, boss_kc_list: list, is_ironman=None) -> float:
+    """Calculates a player's efficient hours bossed and returns it
+    as a float.
+    @:param rsn: str of the user's RuneScape username
+    @:param boss_kc_list: list representing the player's KC for each boss
+
+    @:return float correspoding to the player's efficient hours bossed.
+    """
+    if is_ironman is None:
+        try:
+            iron = is_iron(rsn)
+        except ValueError:
+            print(f'User {rsn} not found!')
+            return -1.0
+    else:
+        iron = is_ironman
+
+    if iron:
+        mode = 'iron'
+    else:
+        mode = 'main'
+
+    total_ehb = 0.0
+    for i in range(len(BOSSES)):
+        kc = boss_kc_list[i]
+        ehb = get_ehb(BOSSES[i], kc, mode)
+        if (kc > 0) & (ehb > 0):
+            total_ehb += ehb
+
+    total_ehb = round(total_ehb, 2)
+    return total_ehb
+
+
+def is_iron(rsn: str) -> bool:
+    """Checks if a given player is an Ironman account.
+    :param rsn: str value of a player's OSRS username
+    :return: boolean, True if user is an ironman, False if not
+    @:raises ValueError if player is not found on highscores
+    """
+    # If we find a user on the Ironman highscores, we know they're an ironman.
+    # Otherwise, we check to make sure the user exists on the main highscore board
+    # This isn't a great solution but it's really the only way to check an account's status
+    try:
+        user = Highscores(rsn, target='ironman')
+        return True
+    except ValueError:
+        try:
+            user = Highscores(rsn)
+            return False
+        except ValueError:
+            raise ValueError
+
 
 def get_user(rsn: str) -> Highscores:
     """Fetches a given user's highscores entries.
@@ -71,6 +197,23 @@ def get_user(rsn: str) -> Highscores:
     return Highscores(rsn)
 
 
+def get_target_type(target: str) -> str:
+    """Returns whether a given contest target is a skill, activity, or boss.
+
+    :param target: String representation of target to query
+    :return: String representing type.
+    """
+    if target in SKILLS:
+        return 'skill'
+    elif target in ACTIVITIES:
+        return 'activity'
+    elif target in BOSSES:
+        return 'boss'
+    else:
+        return f'Target {target} not recognized.'
+
+
+# TODO Wrap all of these query methods into one query_entry(user, target, attr='default') method
 def query_skill_xp(user: Highscores, skill: str) -> int:
     """ Queries XP listed on user's highscores page.
     :param user: User object for player (as returned by get_user())

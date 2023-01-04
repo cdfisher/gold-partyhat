@@ -24,10 +24,12 @@ class WebhookHandler:
     webhook_data = {}
     embeds = {}
 
-    def __init__(self):
+    def __init__(self, hook_url=None):
         self._files = {}
         self.webhook_data = {}
         self.embeds = []
+        self.wh_url = wh_url
+        self.hook_url = hook_url
 
     def add_file(self, file: bytes, filename: str) -> None:
         self._files[f"_{filename}"] = (filename, file)
@@ -47,7 +49,9 @@ class WebhookHandler:
     def send_message(self, msg: str, name=BOT_NAME, avatar=AVATAR_URL) -> None:
         self.config_webhook(msg, name)
         self.webhook_data["avatar_url"] = avatar
-        response = self.make_post_request(wh_url, self.webhook_data, self._files)
+        if self.hook_url is not None:
+            self.wh_url = self.hook_url
+        response = self.make_post_request(self.wh_url, self.webhook_data, self._files)
         try:
             response.raise_for_status()
         except requests.exceptions.HTTPError as err:
@@ -66,7 +70,9 @@ class WebhookHandler:
         self.config_webhook(msg, name)
         self.webhook_data["avatar_url"] = avatar
         self.webhook_data["embeds"] = embeds
-        response = self.make_post_request(wh_url, self.webhook_data, self._files)
+        if self.hook_url is not None:
+            self.wh_url = self.hook_url
+        response = self.make_post_request(self.wh_url, self.webhook_data, self._files)
         try:
             response.raise_for_status()
         except requests.exceptions.HTTPError as err:
@@ -86,7 +92,9 @@ class WebhookHandler:
         self.webhook_data["avatar_url"] = avatar
         fdata = open(filename, 'rb')
         self.add_file(fdata, filename)
-        response = self.make_post_request(wh_url, self.webhook_data, self._files)
+        if self.hook_url is not None:
+            self.wh_url = self.hook_url
+        response = self.make_post_request(self.wh_url, self.webhook_data, self._files)
         try:
             response.raise_for_status()
         except requests.exceptions.HTTPError as err:

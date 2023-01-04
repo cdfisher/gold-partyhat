@@ -130,17 +130,17 @@ embeds = [
             "fields": [
                 {
                     "name": f":first_place:: {top_by_xp[0][0]}",
-                    "value": f"{top_by_xp[0][1]}",
+                    "value": f"{top_by_xp[0][1]:,} XP gained",
                     "inline": "false"
                 },
                 {
                     "name": f":second_place:: {top_by_xp[1][0]}",
-                    "value": f"{top_by_xp[1][1]}",
+                    "value": f"{top_by_xp[1][1]:,} XP gained",
                     "inline": "false"
                 },
                 {
                     "name": f":third_place:: {top_by_xp[2][0]}",
-                    "value": f"{top_by_xp[2][1]}",
+                    "value": f"{top_by_xp[2][1]:,} XP gained",
                     "inline": "false"
                 }
             ],
@@ -152,17 +152,17 @@ embeds = [
             "fields": [
                 {
                     "name": f":first_place:: {top_by_ehb[0][0]}",
-                    "value": f"{top_by_ehb[0][1]}",
+                    "value": f"{top_by_ehb[0][1]} efficient hours bossed",
                     "inline": "false"
                 },
                 {
                     "name": f":second_place:: {top_by_ehb[1][0]}",
-                    "value": f"{top_by_ehb[1][1]}",
+                    "value": f"{top_by_ehb[1][1]} efficient hours bossed",
                     "inline": "false"
                 },
                 {
                     "name": f":third_place:: {top_by_ehb[2][0]}",
-                    "value": f"{top_by_ehb[2][1]}",
+                    "value": f"{top_by_ehb[2][1]} efficient hours bossed",
                     "inline": "false"
                 }
             ]

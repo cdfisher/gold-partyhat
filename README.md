@@ -1,5 +1,5 @@
 # Gold Partyhat
-## v0.4 beta
+## v0.5 beta
 Contest tracking bot for Old School Runescape including Discord integration. 
 
 This is written as a series of Python (and Bash) scripts intended to automate the tracking of Old 
@@ -41,8 +41,23 @@ For the time being, please see the docstrings for `start_contest.py`,
 `update_contest.py`, and `end_contest.py` for examples of how to call those
 scripts.
 
+### Using the automated weekly and monthly contests
+Using `cron`, make sure your `crontab` file has `$HOME` set to the location of the directory
+where you have saved the files for `Gold Partyhat`. Then add the following lines to your `crontab` file.
+```
+0  0  *     * 1     /usr/bin/bash $HOME/weekly_start.sh
+55 23 *     * 7     /usr/bin/bash $HOME/weekly_end.sh
+0  0  1     * *     /usr/bin/bash $HOME/monthly_start.sh
+55 23 28-31 * *     /usr/bin/bash $HOME/monthly_end.sh
+```
+
 ### Changelog
 Starting with v0.4, any significant changes will be listed here.
+
+#### v0.5
+
+- Adds support for weekly and monthly contests tracking top XP gains
+- Moves to using embeds where possible for cleaner messages
 
 #### v0.4.2
 

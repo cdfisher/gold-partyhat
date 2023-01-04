@@ -8,7 +8,7 @@ Then rename file to 'gph_config.py' before running.
 
 # ---------------Bot info---------------
 # Version number for logging purposes
-GPH_VERSION = 'v0.4.2 beta'
+GPH_VERSION = 'v0.5 beta'
 # Bot name to include in JSON payload
 BOT_NAME = 'Gold Partyhat'
 
@@ -36,5 +36,7 @@ N_PARTICIPANTS = 10
 LOG_NAME = 'gph-log.txt'
 # File name for the master dataframe
 MASTER_DF_NAME = 'master_dataframe.csv'
+# File containing a dictionary of rsns and account type
+IRON_DICT_NAME = 'ironmen_dictionary.txt'
 # Link to default bot avatar
 AVATAR_URL = 'https://github.com/cdfisher/gold-partyhat/blob/master/resources/icon.png?raw=true'

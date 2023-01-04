@@ -33,7 +33,8 @@ else:
     log_message(f'Master dataframe file {MASTER_DF_NAME} not found by top_players.py!', log=LOG_NAME)
     raise FileNotFoundError(f'Master dataframe file \'{MASTER_DF_NAME}\' not found!')
 
-if os.path.exists(IRON_DICT_NAME):
+# If a file caching iron/main status exists, open it and read as a dict. Otherwise create it as an empty file.
+if os.path.exists(IRON_DICT_NAME) and os.path.getsize(IRON_DICT_NAME) != 0:
     with open(IRON_DICT_NAME, 'r') as iron_file:
         iron_dict = eval(iron_file.read())
 else:
@@ -69,11 +70,11 @@ for rsn in rsn_array:
 
         # Calculate KC gained for each boss
         for i in range(len(start_list)):
-            # kc_diff_list[i] = kc_end_list[i] - kc_start_list[i]
             kc_gained_list.append(float(end_list[i] - start_list[i]))
 
         # From array of KC gained, calculate EHB
-        # TODO add an optional argument is_iron to here so we can speed things up
+
+        # Check cached list of iron/main status to speed things up immensely.
         if rsn in iron_dict:
             is_ironman = iron_dict[rsn]
         else:
@@ -81,7 +82,7 @@ for rsn in rsn_array:
             iron_dict[rsn] = is_ironman
         ehb_gained = hs.calc_ehb_from_list(rsn, kc_gained_list, is_ironman=is_ironman)
 
-        # add [RSN, delta_overall] to a DataFrame gains_df
+        # add [RSN, delta_overall, delta_ehb] to a DataFrame gains_df
         gains_df.loc[len(gains_df)] = [rsn, xp_gained, ehb_gained]
     # Otherwise there's an error to handle here
     else:
@@ -91,10 +92,9 @@ for rsn in rsn_array:
 with open(IRON_DICT_NAME, 'w') as iron_file:
     iron_file.write(str(iron_dict))
 
-# sort gains_df by delta_overall
+# sort gains dataframe by XP gained
 gains_df = gains_df.sort_values(by=['XP gained'], ascending=False).reset_index(drop=True)
 
-msg = ''
 time_period_number = source_id[-4:-2]
 if time_period_number[1] == '1':
     suffix = 'st'
@@ -110,25 +110,66 @@ ordinal_time_period = time_period_number + suffix
 
 year = '20' + source_id[-2:]
 
-msg += f'Top XP gained for the {ordinal_time_period} {period} of {year}\n'
-
-# TODO Change this over to send via embeds
-
-# Add top 3 to message
+top_by_xp = []
+# Get top 3 players and their XP gained
 for i in range(3):
-    msg += f'#{i + 1}) {gains_df.at[i, "RSN"]} XP gained: {gains_df.at[i, "XP gained"]}\n'
+    top_by_xp.append([gains_df.at[i, "RSN"], gains_df.at[i, "XP gained"]])
 
-# sort gains_df by delta_EHB
+# sort gains dataframe by EHB gained
 gains_df = gains_df.sort_values(by=['EHB gained'], ascending=False).reset_index(drop=True)
-# Add top 3 to message
-msg += f'Top EHB gained for the {ordinal_time_period} {period} of {year}\n'
 
-# TODO Change this over to send via embeds
-
-# Add top 3 to message
+top_by_ehb = []
+# Get top 3 players and their EHB gained
 for i in range(3):
-    msg += f'#{i + 1}) {gains_df.at[i, "RSN"]} EHB gained: {gains_df.at[i, "EHB gained"]}\n'
+    top_by_ehb.append([gains_df.at[i, "RSN"], gains_df.at[i, "EHB gained"]])
+
+# Build embeds
+embeds = [
+        {
+            "title": f"Top XP gained for the {ordinal_time_period} {period} of {year}",
+            "fields": [
+                {
+                    "name": f":first_place:: {top_by_xp[0][0]}",
+                    "value": f"{top_by_xp[0][1]}",
+                    "inline": "false"
+                },
+                {
+                    "name": f":second_place:: {top_by_xp[1][0]}",
+                    "value": f"{top_by_xp[1][1]}",
+                    "inline": "false"
+                },
+                {
+                    "name": f":third_place:: {top_by_xp[2][0]}",
+                    "value": f"{top_by_xp[2][1]}",
+                    "inline": "false"
+                }
+            ],
+            "color": 6655
+        },
+        {
+            "title": f"Top EHB gained for the {ordinal_time_period} {period} of {year}",
+            "color": 16714507,
+            "fields": [
+                {
+                    "name": f":first_place:: {top_by_ehb[0][0]}",
+                    "value": f"{top_by_ehb[0][1]}",
+                    "inline": "false"
+                },
+                {
+                    "name": f":second_place:: {top_by_ehb[1][0]}",
+                    "value": f"{top_by_ehb[1][1]}",
+                    "inline": "false"
+                },
+                {
+                    "name": f":third_place:: {top_by_ehb[2][0]}",
+                    "value": f"{top_by_ehb[2][1]}",
+                    "inline": "false"
+                }
+            ]
+        }
+    ]
+
 # Send message
 wh = WebhookHandler()
-wh.send_message(msg)
+wh.send_embed('', embeds=embeds)
 log_message(f'Done running top_players.py for source id: {source_id}', log=LOG_NAME)

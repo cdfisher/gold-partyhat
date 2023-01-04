@@ -68,7 +68,6 @@ class WebhookHandler:
         self.webhook_data["embeds"] = embeds
         response = self.make_post_request(wh_url, self.webhook_data, self._files)
         try:
-            print(self.webhook_data)
             response.raise_for_status()
         except requests.exceptions.HTTPError as err:
             log_message(err)

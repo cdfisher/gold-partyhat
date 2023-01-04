@@ -36,7 +36,6 @@ Example call for a contest:
 import os
 import argparse
 from hashlib import sha1
-from gph_config import *
 from data_updater import *
 from gph_logging import log_message
 from webhook_handler import WebhookHandler
@@ -52,14 +51,14 @@ parser.add_argument('end', type=str, help='Timestamp marking the end of the cont
 parser.add_argument('group', type=str, help='Name of the text file where group members are listed, excluding the'
                                             'file extension.')
 parser.add_argument('--force_id', nargs='?', default='', type=str, help='Set the contest ID to be a specific value '
-                                                                      'instead of an automatically generated one.')
-parser.add_argument('--threshold', nargs='?', default=THRESHOLD, type=int, help='The amount of XP, KC, or score needed to be '
-                                                                       'counted as a participant.')
-parser.add_argument('--top_n', nargs='?', default=TOP_N, type=int, help='The number of top participants to list when updating'
-                                                                  ' the contest.')
+                                                                        'instead of an automatically generated one.')
+parser.add_argument('--threshold', nargs='?', default=THRESHOLD, type=int, help='The amount of XP, KC, or score needed '
+                                                                                'to be counted as a participant.')
+parser.add_argument('--top_n', nargs='?', default=TOP_N, type=int, help='The number of top participants to list when '
+                                                                        'updating the contest.')
 parser.add_argument('--winners', nargs='?', default=WINNERS, type=int, help='The number of contest winners.')
 parser.add_argument('--raffle_winners', nargs='?', default=3, type=int, help='The number of participation prizes'
-                                                                           ' available.')
+                                                                             ' available.')
 parser.add_argument('--raffle_mode', type=str, choices=['classic', 'top_participants'], default='top_participants',
                     help='The mode to use at the end of the contest to draw participation prizes.')
 parser.add_argument('--participants', nargs='?', default=N_PARTICIPANTS, type=int, help='The number of participants to '
@@ -140,11 +139,10 @@ if not contest_id:
 
 update_number = 0
 
-# Start building start-of-contest message to send to Discord
-msg = f'Running {BOT_NAME} {GPH_VERSION}\n'
+# Log start of contest
 log_message(f'Starting competition for {mode} {target}, running Gold '
             f'Partyhat {GPH_VERSION}', log=logfile)
-log_message(f'Contest name: {title}', log=logfile)
+log_message(f'Contest name: {title}, contest ID: {contest_id}', log=logfile)
 
 # Load master_df if it exists as a file, otherwise start with an empty df as master_df.
 if os.path.exists(MASTER_DF_NAME):
@@ -166,9 +164,8 @@ with open(fname, 'w') as file:
     for i in range(len(contest_df.index)):
         rsn = contest_df.at[i, 'RSN']
         score = contest_df.at[i, 'Current']
-        file.write(f'{rsn:<12}        {score:>12}\n')
+        file.write(f'{rsn:<12}        {score:>12,}\n')
 
-msg += f'{n_users} players are being tracked!\n'
 log_message(f'Competition started successfully. Tracking {n_users} '
             f'members.', log=logfile)
 
@@ -179,6 +176,15 @@ contest_settings = [contest_id, mode, target, threshold, units, group, top_n, wi
 with open(datafile, 'a') as file:
     file.write(str(contest_settings))
 
+embed = [
+        {
+            "title": f"Running {BOT_NAME} {GPH_VERSION}",
+            "color": 16768768,
+            "description": f"{title} has begun. Get {threshold:,} {units} to be eligible for the "
+                           f"participation raffle!\n\n{n_users} players are being tracked."
+        }
+    ]
+
 # TODO create cron jobs via python-crontab
 
 # If the --silent flag was used, don't send anything to Discord. Otherwise, send
@@ -186,6 +192,8 @@ with open(datafile, 'a') as file:
 # message via a webhook.
 if not (silent | quiet):
     wh = WebhookHandler()
+    msg = ''
+    wh.send_embed(msg, embeds=embed)
     wh.send_file(msg, filename=fname)
 
 # Remove the file listing the starting scores

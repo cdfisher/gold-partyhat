@@ -37,7 +37,6 @@ class WebhookHandler:
     def config_webhook(self, content: str, username: str) -> None:
         self.webhook_data["content"] = content
         self.webhook_data["username"] = username
-        self.webhook_data["embeds"] = self.embeds
 
     def make_post_request(self, url: str, data: dict, _files: dict) -> requests.post:
         if not bool(self._files):
@@ -80,15 +79,17 @@ class WebhookHandler:
         else:
             now = datetime.datetime.now()
             timestamp = now.strftime('%d %b %Y - %H:%M:%S ')
-            log_message(f'Text payload delivered with code {response.status_code} '
+            log_message(f'Embed payload delivered with code {response.status_code} '
                         f'at {timestamp}', log=LOG_NAME)
-            print(f'Text payload delivered with code {response.status_code} '
+            print(f'Embed payload delivered with code {response.status_code} '
                   f'at {timestamp}')
             self.webhook_data = {}
             self._files = {}
 
-    def send_file(self, msg: str, filename: str, name=BOT_NAME, avatar=AVATAR_URL) -> None:
+    def send_file(self, msg: str, filename: str, name=BOT_NAME, avatar=AVATAR_URL, embeds=None) -> None:
         self.config_webhook(msg, name)
+        if embeds is not None:
+            self.webhook_data["embeds"] = embeds
         self.webhook_data["avatar_url"] = avatar
         fdata = open(filename, 'rb')
         self.add_file(fdata, filename)

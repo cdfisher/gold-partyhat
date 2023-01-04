@@ -62,7 +62,7 @@ else:
 silent = args.silent
 quiet = args.quiet
 
-log_message(f'Updating contest {title}.', log=logfile)
+log_message(f'Updating contest {title}, contest ID: {contest_id}.', log=logfile)
 
 # Get list of settings from the footer of the CSV
 with open(datafile, 'rb') as f:
@@ -105,8 +105,8 @@ master_df, contest_df = update_entry(group, mode, target, 'update', update_numbe
 
 participants = set()
 
-msg = f'{title} top {top_n} (so far)\n'
-
+msg = ''
+fields = []
 
 # TODO See if I can partially wrap creation of the progress file
 # TODO into these next two loops
@@ -115,10 +115,23 @@ msg = f'{title} top {top_n} (so far)\n'
 for i in range(top_n):
     rsn = contest_df.at[i, 'RSN']
 
-    line = f'{i+1}) {rsn} {units} gained: {contest_df.at[i, "Gained"]:,}\n'
     if contest_df.at[i, 'Gained'] >= threshold:
         participants.add(rsn)
-    msg += line + '\n'
+    fields.append({
+        "name": f"{i + 1}) {rsn}",
+        "value": f'{contest_df.at[i, "Gained"]:,} {units} gained',
+        "inline": 'false'
+    })
+
+embed = [
+    {
+        "title": f"{title} top {top_n} (so far)",
+        "color": 16768768,
+        "description": f"",
+        "fields": fields
+
+    }
+]
 
 # Make a list of all participants outside the top_n who still meet the
 # threshold for participation.
@@ -139,7 +152,7 @@ for i in range(top_n):
     rsn = contest_df.at[i, 'RSN']
     ranked_users.append(rsn)
     player_data = []
-    for j in range(update_number+1):
+    for j in range(update_number + 1):
         row = master_df.loc[(master_df['RSN'] == rsn) & (master_df['Update number'] == j) &
                             (master_df['Update source'] == contest_id)]
         player_data.append(row.iloc[0]['overall'])
@@ -150,7 +163,7 @@ for i in range(top_n):
 graph_data[0] = ranked_users
 
 update_list = []
-for i in range(update_number+1):
+for i in range(update_number + 1):
     update_list.append(i)
 
 # Set up Pyplot to customize the appearance of the graph
@@ -163,10 +176,9 @@ with plt.rc_context({'axes.spines.right': False, 'axes.spines.top': False, 'axes
                      'xtick.color': text_color, 'ytick.color': text_color, 'legend.edgecolor': text_color,
                      'legend.fancybox': True, 'figure.facecolor': bg_color, 'figure.edgecolor': text_color,
                      'figure.titlesize': 'large'}):
-
     # Add lines for each of the top_n to the graph
     for i in range(len(graph_data[0])):
-        plt.plot(update_list, graph_data[i+1], label=graph_data[0][i], marker=plot_markers[i])
+        plt.plot(update_list, graph_data[i + 1], label=graph_data[0][i], marker=plot_markers[i])
 
     # More plot setup
     plotname = f'{title} top {top_n} progress'
@@ -194,7 +206,7 @@ with open(textfile, 'w') as file:
         gain = contest_df.at[i, 'Gained']
         if gain <= 0:
             break
-        file.write(f'{i+1:>3})  {rsn:<12}     {gain:>12}\n')
+        file.write(f'{i + 1:>3})  {rsn:<12}     {gain:>12,}\n')
 
 log_message(f'Progress file {textfile} created successfully.', log=logfile)
 
@@ -227,7 +239,7 @@ contest_settings = [contest_id, mode, target, threshold, units, group, top_n, wi
 with open(datafile, 'a') as file:
     file.write(str(contest_settings))
 
-log_message('Contest successfully updated.', log=logfile)
+log_message(f'Contest {contest_id} successfully updated.', log=logfile)
 
 # If the --silent flag was used, don't send anything to Discord. Otherwise, send
 # a list of the top_n and the list of players' progress as a Discord
@@ -237,9 +249,9 @@ if not (silent | quiet):
 
     # Using with resolves an issue where the files sent to Discord using add_file() could not be removed
     with open(plotfile, 'rb') as pf:
+        wh.send_embed('', embeds=embed)
         wh.add_file(pf, plotfile)
         wh.send_file(msg, filename=textfile)
-
 
 # Remove the text file with everyone's progress and the plot image after sending them to
 # Discord

@@ -66,8 +66,7 @@ else:
 silent = args.silent
 quiet = args.quiet
 
-log_message(f'Running final update for contest {title}.', log=logfile)
-
+log_message(f'Running final update for contest {title}, contest ID: {contest_id}.', log=logfile)
 
 # Get list of settings from the footer of the CSV
 with open(datafile, 'rb') as f:
@@ -108,7 +107,9 @@ master_df = pd.read_csv(MASTER_DF_NAME)
 master_df, contest_df = update_entry(group, mode, target, 'end', update_number,
                                      master_df, logfile, datafile, contest_id)
 
-msg = f'{title} winners:\n'
+msg = ''
+
+fields = []
 
 win_emoji = [':first_place:', ':second_place:', ':third_place:']
 
@@ -116,10 +117,27 @@ for i in range(winners):
     rsn = contest_df.at[i, 'RSN']
     # Handle case in which there are more winners than we have emoji
     if i < 3:
-        msg += f'{win_emoji[i]}: {rsn} {units} gained: {contest_df.at[i, "Gained"]:,}\n'
+        fields.append({
+            "name": f"{win_emoji[i]}: {rsn}",
+            "value": f'{contest_df.at[i, "Gained"]:,} {units} gained',
+            "inline": 'false'
+        })
     else:
-        msg += f' {i+1}) : {rsn} {units} gained: {contest_df.at[i, "Gained"]:,}\n'
+        fields.append({
+            "name": f"{i + 1}) {rsn}",
+            "value": f'{contest_df.at[i, "Gained"]:,} {units} gained',
+            "inline": 'false'
+        })
 
+embed = [
+    {
+        "title": f"{title} winners",
+        "color": 16768768,
+        "description": f"",
+        "fields": fields
+
+    }
+]
 
 # TODO look into generating the text file and graph_data simultaneously
 # Create graph showing the progress of the winners to send in Discord
@@ -131,7 +149,7 @@ for i in range(winners):
     rsn = contest_df.at[i, 'RSN']
     ranked_users.append(rsn)
     player_data = []
-    for j in range(update_number+1):
+    for j in range(update_number + 1):
         row = master_df.loc[(master_df['RSN'] == rsn) & (master_df['Update number'] == j) &
                             (master_df['Update source'] == contest_id)]
         player_data.append(row.iloc[0]['overall'])
@@ -142,7 +160,7 @@ for i in range(winners):
 graph_data[0] = ranked_users
 
 update_list = []
-for i in range(update_number+1):
+for i in range(update_number + 1):
     update_list.append(i)
 
 # Set up Pyplot to customize the appearance of the graph
@@ -155,10 +173,9 @@ with plt.rc_context({'axes.spines.right': False, 'axes.spines.top': False, 'axes
                      'xtick.color': text_color, 'ytick.color': text_color, 'legend.edgecolor': text_color,
                      'legend.fancybox': True, 'figure.facecolor': bg_color, 'figure.edgecolor': text_color,
                      'figure.titlesize': 'large'}):
-
     # Add lines for each of the top_n to the graph
     for i in range(len(graph_data[0])):
-        plt.plot(update_list, graph_data[i+1], label=graph_data[0][i], marker=plot_markers[i])
+        plt.plot(update_list, graph_data[i + 1], label=graph_data[0][i], marker=plot_markers[i])
 
     # More plot setup
     plotname = f'{title} winners progress'
@@ -173,7 +190,6 @@ with plt.rc_context({'axes.spines.right': False, 'axes.spines.top': False, 'axes
     plotfile = plotfile.lower()
     plt.tight_layout()
     plt.savefig(plotfile)
-
 
 # TODO Look into consolidating this section since there's a lot of shared code between modes
 if raffle_mode == 'classic':
@@ -221,7 +237,7 @@ elif raffle_mode == 'top_participants':
     participants = set()
 
     # Make a set of everyone eligible for a prize
-    for i in range(winners, winners+n_participants):
+    for i in range(winners, winners + n_participants):
         gained = contest_df.at[i, 'Gained']
         if gained >= threshold:
             rsn = contest_df.at[i, 'RSN']
@@ -264,7 +280,7 @@ with open(textfile, 'w') as file:
         gain = contest_df.at[i, 'Gained']
         if gain <= 0:
             break
-        file.write(f'{i+1:>3})  {rsn:<12}     {gain:>12}\n')
+        file.write(f'{i + 1:>3})  {rsn:<12}     {gain:>12,}\n')
 
 log_message(f'Ranking file {textfile} created successfully.', log=logfile)
 
@@ -273,7 +289,7 @@ log_message(f'Ranking file {textfile} created successfully.', log=logfile)
 contest_df.to_csv('final-' + datafile, index=False)
 master_df.to_csv(MASTER_DF_NAME, index=False)
 
-log_message('Winners selected and raffle prize drawn.', log=logfile)
+log_message(f'Winners selected and raffle prize drawn for contest ID {contest_id}', log=logfile)
 
 # If the --silent flag was used, don't send anything to Discord. Otherwise, send
 # a list of contest and raffle winners,  the list of players' final ranks, and the
@@ -283,6 +299,7 @@ if not (silent | quiet):
 
     # Using with resolves an issue where the files sent to Discord using add_file() could not be removed
     with open(plotfile, 'rb') as pf:
+        wh.send_embed('', embeds=embed)
         wh.add_file(pf, plotfile)
         wh.send_file(msg, filename=textfile)
 

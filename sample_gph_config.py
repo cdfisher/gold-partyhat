@@ -18,6 +18,9 @@ BOT_NAME = 'Gold Partyhat'
 TEST_MODE = 0
 # Live server webhook
 WEBHOOK = ''
+# Separate webhook for weekly/monthly top contests. Set = WEBHOOK if sending to the same channel as the regular
+# contest updates.
+TOP_PLAYERS_WEBHOOK = ''
 # Test server webhook
 TEST_WEBHOOK = ''
 

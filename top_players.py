@@ -16,6 +16,11 @@ from gph_config import LOG_NAME
 from gph_logging import log_message
 from webhook_handler import WebhookHandler
 
+if TEST_MODE:
+    update_webhook = TEST_WEBHOOK
+else:
+    update_webhook = TOP_PLAYERS_WEBHOOK
+
 parser = argparse.ArgumentParser()
 parser.add_argument('source_id', type=str, help='Contest identifier.')
 parser.add_argument('period', type=str, help='Period of time to look at')
@@ -170,6 +175,6 @@ embeds = [
     ]
 
 # Send message
-wh = WebhookHandler()
+wh = WebhookHandler(hook_url=update_webhook)
 wh.send_embed('', embeds=embeds)
 log_message(f'Done running top_players.py for source id: {source_id}', log=LOG_NAME)

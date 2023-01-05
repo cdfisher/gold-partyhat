@@ -22,10 +22,14 @@ else:
 class WebhookHandler:
     _files = {}
     webhook_data = {}
+    embeds = {}
 
-    def __int__(self):
+    def __init__(self, hook_url=None):
         self._files = {}
         self.webhook_data = {}
+        self.embeds = []
+        self.wh_url = wh_url
+        self.hook_url = hook_url
 
     def add_file(self, file: bytes, filename: str) -> None:
         self._files[f"_{filename}"] = (filename, file)
@@ -44,7 +48,9 @@ class WebhookHandler:
     def send_message(self, msg: str, name=BOT_NAME, avatar=AVATAR_URL) -> None:
         self.config_webhook(msg, name)
         self.webhook_data["avatar_url"] = avatar
-        response = self.make_post_request(wh_url, self.webhook_data, self._files)
+        if self.hook_url is not None:
+            self.wh_url = self.hook_url
+        response = self.make_post_request(self.wh_url, self.webhook_data, self._files)
         try:
             response.raise_for_status()
         except requests.exceptions.HTTPError as err:
@@ -52,19 +58,20 @@ class WebhookHandler:
         else:
             now = datetime.datetime.now()
             timestamp = now.strftime('%d %b %Y - %H:%M:%S ')
-            #log_message(f'Text payload delivered with code {response.status_code} '
-                        #f'at {timestamp}')
+            log_message(f'Text payload delivered with code {response.status_code} '
+                        f'at {timestamp}', log=LOG_NAME)
             print(f'Text payload delivered with code {response.status_code} '
-            f'at {timestamp}')
+                  f'at {timestamp}')
             self.webhook_data = {}
             self._files = {}
 
-    def send_file(self, msg: str, filename: str, name=BOT_NAME, avatar=AVATAR_URL) -> None:
+    def send_embed(self, msg: str, embeds: list, name=BOT_NAME, avatar=AVATAR_URL) -> None:
         self.config_webhook(msg, name)
         self.webhook_data["avatar_url"] = avatar
-        fdata = open(filename, 'rb')
-        self.add_file(fdata, filename)
-        response = self.make_post_request(wh_url, self.webhook_data, self._files)
+        self.webhook_data["embeds"] = embeds
+        if self.hook_url is not None:
+            self.wh_url = self.hook_url
+        response = self.make_post_request(self.wh_url, self.webhook_data, self._files)
         try:
             response.raise_for_status()
         except requests.exceptions.HTTPError as err:
@@ -72,10 +79,34 @@ class WebhookHandler:
         else:
             now = datetime.datetime.now()
             timestamp = now.strftime('%d %b %Y - %H:%M:%S ')
-            #log_message(f'File payload delivered with code {response.status_code}'
-                        #f' at {timestamp}')
+            log_message(f'Embed payload delivered with code {response.status_code} '
+                        f'at {timestamp}', log=LOG_NAME)
+            print(f'Embed payload delivered with code {response.status_code} '
+                  f'at {timestamp}')
+            self.webhook_data = {}
+            self._files = {}
+
+    def send_file(self, msg: str, filename: str, name=BOT_NAME, avatar=AVATAR_URL, embeds=None) -> None:
+        self.config_webhook(msg, name)
+        if embeds is not None:
+            self.webhook_data["embeds"] = embeds
+        self.webhook_data["avatar_url"] = avatar
+        fdata = open(filename, 'rb')
+        self.add_file(fdata, filename)
+        if self.hook_url is not None:
+            self.wh_url = self.hook_url
+        response = self.make_post_request(self.wh_url, self.webhook_data, self._files)
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as err:
+            log_message(err)
+        else:
+            now = datetime.datetime.now()
+            timestamp = now.strftime('%d %b %Y - %H:%M:%S ')
+            log_message(f'File payload delivered with code {response.status_code}'
+                        f' at {timestamp}', log=LOG_NAME)
             print(f'File payload delivered with code {response.status_code}'
-                        f' at {timestamp}')
+                  f' at {timestamp}')
         fdata.close()
         self.webhook_data = {}
         self._files = {}

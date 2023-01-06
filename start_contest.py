@@ -136,7 +136,7 @@ else:
 # If contest ID is not manually set with --force_id, generate an 8 character code as a contest
 # identifier. Not currently used but implemented for a planned future feature.
 if not contest_id:
-    contest_id = str(sha1((mode + target + title + start + end).encode('utf-8')))[-9:-1]
+    contest_id = str(sha1((mode + target + title + start + end).encode('utf-8')).hexdigest())[-9:-1]
 
 update_number = 0
 

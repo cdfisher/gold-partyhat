@@ -35,6 +35,7 @@ Example call for a contest:
 """
 import os
 import argparse
+from time import sleep
 from hashlib import sha1
 from data_updater import *
 from gph_logging import log_message
@@ -177,13 +178,20 @@ with open(datafile, 'a') as file:
     file.write(str(contest_settings))
 
 embed = [
-        {
-            "title": f"Running {BOT_NAME} {GPH_VERSION}",
-            "color": 16768768,
-            "description": f"{title} has begun. Get {threshold:,} {units} to be eligible for the "
-                           f"participation raffle!\n\n{n_users} players are being tracked."
-        }
-    ]
+    {
+        "title": f"Running {BOT_NAME} {GPH_VERSION}",
+        "color": 16768768,
+        "description": f"{title} has begun. Get {threshold:,} {units} to be eligible for the "
+                       f"participation raffle!\n\n{n_users} players are being tracked.",
+        "fields": [
+            {
+                "name": "Contest ID:",
+                "value": f'{contest_id}',
+                "inline": "false"
+            }
+        ]
+    }
+]
 
 # TODO create cron jobs via python-crontab
 
@@ -194,6 +202,9 @@ if not (silent | quiet):
     wh = WebhookHandler()
     msg = ''
     wh.send_embed(msg, embeds=embed)
+    # Small delay to let the embed request arrive before the files
+    # Minor workaround for now
+    sleep(0.25)
     wh.send_file(msg, filename=fname)
 
 # Remove the file listing the starting scores

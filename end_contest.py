@@ -27,7 +27,7 @@ Example call for a contest:
 import random
 import argparse
 import matplotlib.pyplot as plt
-from gph_config import *
+from time import sleep
 from data_updater import *
 from os import remove
 from math import floor
@@ -246,7 +246,7 @@ elif raffle_mode == 'top_participants':
             break
 
     line = f'\nHere are the top {len(participants)} who have met the participation ' \
-           f'threshold of {threshold} {units} and are in the running for a participation ' \
+           f'threshold of {threshold:,} {units} and are in the running for a participation ' \
            f'prize!\n'
 
     msg += line

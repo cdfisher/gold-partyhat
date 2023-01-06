@@ -24,9 +24,9 @@ Example call for a contest:
 """
 import argparse
 import matplotlib.pyplot as plt
-from gph_config import *
 from data_updater import *
 from os import remove
+from time import sleep
 from ast import literal_eval
 from gph_logging import log_message
 from webhook_handler import WebhookHandler
@@ -250,6 +250,9 @@ if not (silent | quiet):
     # Using with resolves an issue where the files sent to Discord using add_file() could not be removed
     with open(plotfile, 'rb') as pf:
         wh.send_embed('', embeds=embed)
+        # Small delay to let the embed request arrive before the files
+        # Minor workaround for now
+        sleep(0.25)
         wh.add_file(pf, plotfile)
         wh.send_file(msg, filename=textfile)
 

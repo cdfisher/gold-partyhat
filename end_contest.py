@@ -152,7 +152,7 @@ for i in range(winners):
     for j in range(update_number + 1):
         row = master_df.loc[(master_df['RSN'] == rsn) & (master_df['Update number'] == j) &
                             (master_df['Update source'] == contest_id)]
-        player_data.append(row.iloc[0]['overall'])
+        player_data.append(row.iloc[0][target])
     start_value = player_data[0]
     for k in range(len(player_data)):
         player_data[k] = player_data[k] - start_value

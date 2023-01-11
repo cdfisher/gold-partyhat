@@ -128,10 +128,18 @@ top_by_ehb = []
 for i in range(3):
     top_by_ehb.append([gains_df.at[i, "RSN"], gains_df.at[i, "EHB gained"]])
 
+
+months = ['January', 'February', 'March', 'April', 'May', 'June',
+          'July', 'August', 'September,' 'October', 'November', 'December']
+if period == 'month' and ((int(time_period_number) >= 1) and (int(time_period_number) < 13)):
+    time_period = months[int(time_period_number) - 1]
+else:
+    time_period = f'the {ordinal_time_period} {period} of'
+
 # Build embeds
 embeds = [
         {
-            "title": f"Top XP gained for the {ordinal_time_period} {period} of {year}",
+            "title": f"Top XP gained for {time_period} {year}",
             "fields": [
                 {
                     "name": f":first_place:: {top_by_xp[0][0]}",
@@ -152,7 +160,7 @@ embeds = [
             "color": 6655
         },
         {
-            "title": f"Top EHB gained for the {ordinal_time_period} {period} of {year}",
+            "title": f"Top EHB gained for {time_period} {year}",
             "color": 16714507,
             "fields": [
                 {

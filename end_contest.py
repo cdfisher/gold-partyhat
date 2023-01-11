@@ -27,7 +27,7 @@ Example call for a contest:
 import random
 import argparse
 import matplotlib.pyplot as plt
-from gph_config import *
+from time import sleep
 from data_updater import *
 from os import remove
 from math import floor
@@ -149,10 +149,23 @@ for i in range(winners):
     rsn = contest_df.at[i, 'RSN']
     ranked_users.append(rsn)
     player_data = []
+
     for j in range(update_number + 1):
-        row = master_df.loc[(master_df['RSN'] == rsn) & (master_df['Update number'] == j) &
-                            (master_df['Update source'] == contest_id)]
-        player_data.append(row.iloc[0]['overall'])
+        try:
+            row = master_df.loc[(master_df['RSN'] == rsn) & (master_df['Update number'] == j) &
+                                (master_df['Update source'] == contest_id)]
+            player_data.append(row.iloc[0][target])
+        except IndexError:
+            log_message(f'Index error encountered while graphing {rsn} at index {j}')
+            continue
+
+        except (KeyError, ValueError):
+            # Possibly encountered if a player changes names partway through a contest.
+            # TODO handle this a little more robustly
+            log_message(f'A data error was encountered for user {rsn} at update #{j}.\n'
+                        f'This may be the result of a name change.')
+            continue
+
     start_value = player_data[0]
     for k in range(len(player_data)):
         player_data[k] = player_data[k] - start_value
@@ -246,7 +259,7 @@ elif raffle_mode == 'top_participants':
             break
 
     line = f'\nHere are the top {len(participants)} who have met the participation ' \
-           f'threshold of {threshold} {units} and are in the running for a participation ' \
+           f'threshold of {threshold:,} {units} and are in the running for a participation ' \
            f'prize!\n'
 
     msg += line

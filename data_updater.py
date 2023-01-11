@@ -85,8 +85,12 @@ def update_entry(infile: str, game_mode: str, target: str, update_mode: str,
                 now = datetime.now()
                 timestamp = now.strftime('[%d %b %Y - %H:%M:%S]')
                 entry_array = [timestamp, update_number, source_id, rsn] + hs_entries
-                master_dataframe.loc[len(
-                    master_dataframe)] = entry_array
+                try:
+                    master_dataframe.loc[len(
+                        master_dataframe)] = entry_array
+                except ValueError as err:
+                    log_message(f'Data error {err} occurred while adding row for {rsn} to master dataframe.')
+                    continue
 
             # Export both dataframes to .csv files
             master_dataframe.to_csv(MASTER_DF_NAME, index=False)

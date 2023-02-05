@@ -17,6 +17,7 @@ ENV/
 # Various files / backups
 server/
 utils/
+demo/
 group.txt
 group.csv
 raw-group.txt

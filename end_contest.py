@@ -24,6 +24,8 @@ Example call for a contest:
 
 "python end_contest.py 'CFF965D0' 'Attack test contest'"
 """
+
+import re
 import random
 import argparse
 import matplotlib.pyplot as plt
@@ -54,12 +56,14 @@ contest_id = args.contest_id
 title = args.title
 raffle_winners = args.raffle_winners
 if args.datafile is None:
-    datafile = title.replace(' ', '-')
+    datafile = re.sub(' ', '-', title)
+    datafile = re.sub('[!@#$%^&*()+=,/<>?|]', '', datafile)
     datafile = datafile.lower() + '.csv'
 else:
     datafile = args.datafile + '.csv'
 if args.logfile is None:
-    logfile = title.replace(' ', '-')
+    logfile = re.sub(' ', '-', title)
+    logfile = re.sub('[!@#$%^&*()+=,/<>?|]', '', logfile)
     logfile = logfile.lower() + '-log.txt'
 else:
     logfile = args.logfile + '.txt'

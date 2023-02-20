@@ -34,6 +34,7 @@ Example call for a contest:
     --threshold 5000"
 """
 import os
+import re
 import argparse
 from time import sleep
 from hashlib import sha1
@@ -94,12 +95,14 @@ raffle_mode = args.raffle_mode
 n_participants = args.participants
 dynamic_prizes = args.dynamic_prizes
 if args.datafile is None:
-    datafile = title.replace(' ', '-')
+    datafile = re.sub(' ', '-', title)
+    datafile = re.sub('[!@#$%^&*()+=,/<>?|]', '', datafile)
     datafile = datafile.lower() + '.csv'
 else:
     datafile = args.datafile + '.csv'
 if args.logfile is None:
-    logfile = title.replace(' ', '-')
+    logfile = re.sub(' ', '-', title)
+    logfile = re.sub('[!@#$%^&*()+=,/<>?|]', '', logfile)
     logfile = logfile.lower() + '-log.txt'
 else:
     logfile = args.logfile + '.txt'

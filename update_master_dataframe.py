@@ -31,11 +31,7 @@ update_number = args.update_number
 
 log_message(f'Updating master dataframe from source {source_id}', log=LOG_NAME)
 
-# Load master_df if it exists as a file, otherwise start with an empty df as master_df.
-if os.path.exists(MASTER_DF_NAME):
-    master_df = pd.read_csv(MASTER_DF_NAME)
-else:
-    master_df = pd.DataFrame(columns=master_colnames)
+df = pd.DataFrame(columns=master_colnames)
 
 with open(group + '.txt') as file:
     users = file.readlines()
@@ -55,9 +51,9 @@ with open(group + '.txt') as file:
         now = datetime.now()
         timestamp = now.strftime('[%d %b %Y - %H:%M:%S]')
         entry_array = [timestamp, update_number, source_id, rsn] + hs_entries
-        master_df.loc[len(
-            master_df)] = entry_array
+        df.loc[len(
+            df)] = entry_array
 
-    master_df.to_csv(MASTER_DF_NAME, index=False)
+    df.to_csv(MASTER_DF_NAME, mode='a', header=not os.path.exists(MASTER_DF_NAME), index=False)
 
 log_message(f'Master dataframe successfully updated from source {source_id}', log=LOG_NAME)

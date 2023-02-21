@@ -112,7 +112,7 @@ else:
     datafile = args.datafile + '.csv'
 settings['datafile'] = datafile
 if args.logfile is None:
-    logfile = ftitle.lower() + '-log.csv'
+    logfile = ftitle.lower() + '-log.txt'
 else:
     logfile = args.logfile + '.txt'
 settings['logfile'] = logfile

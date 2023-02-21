@@ -179,7 +179,7 @@ plotname = f'{title} winners progress'
 plotfile = plotname.replace(' ', '-') + f'-winner-progress.png'
 plotfile = plotfile.lower()
 
-make_graph(graph_data, update_list, title, top_n, units, plotname, plotfile)
+make_graph(graph_data, update_list, units, plotname, plotfile)
 
 # TODO Look into consolidating this section since there's a lot of shared code between modes
 if raffle_mode == 'classic':

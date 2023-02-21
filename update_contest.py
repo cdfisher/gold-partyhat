@@ -182,7 +182,7 @@ plotname = f'{title} top {top_n} progress'
 plotfile = plotname.replace(' ', '-') + f'-update-{update_number}.png'
 plotfile = plotfile.lower()
 
-make_graph(graph_data, update_list, title, top_n, units, plotname, plotfile)
+make_graph(graph_data, update_list, units, plotname, plotfile)
 
 # Make file listing the ranks of everyone who has increased
 # their score since the start of the contest.

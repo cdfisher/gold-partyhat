@@ -5,7 +5,7 @@ File containing pyplot code that's used in several places.
 from matplotlib import pyplot as plt
 
 
-def make_graph(graph_data, update_list, title, top_n, units, plotname, plotfile_name):
+def make_graph(graph_data, update_list, units, plotname, plotfile_name):
     # Set up Pyplot to customize the appearance of the graph
     text_color = '#99AAB5'
     bg_color = '#333333'

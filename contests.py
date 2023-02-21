@@ -2,6 +2,7 @@
 Classes to represent both the settings for a single contest and a table of settings for all
 contests for the Gold Partyhat bot.
 """
+import pprint
 
 
 class ContestData:
@@ -51,7 +52,8 @@ class ContestData:
         return str(self.__dict__)
 
     def __repr__(self):
-        return str(self.__dict__)
+        #return str(self.__dict__)
+        return pprint.pformat(self.__dict__, indent=8)
 
 
 class ContestTable:
@@ -82,4 +84,6 @@ class ContestTable:
 
     def to_file(self, filename: str):
         with open(filename + '.txt', 'w') as file:
-            file.write(str(self.table))
+            pstring = pprint.pformat(self.table, indent=4)
+            #file.write(str(self.table))
+            file.write(pstring)

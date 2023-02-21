@@ -5,27 +5,27 @@ reached a set threshold for participation and selects winners to
 receive participation prizes
 Additionally, updates a master dataframe that tracks all entries on each user's highscores page.
 
-@:arg contest_id: str 8 character code used as a contest identifier. Not yet used, but implemented
-for use with a planned future feature.
-@:arg title: str The name of the contest.
-@:arg --raffle_winners. int Updates the number of participation prizes available if different from what was
-given at contest start.
-@:arg --datafile: str. Optional flag to set the name of the file where contest data is stored, not including a file
-extension.  Defaults to title.lower.replace(' ', '-')
-@:arg --logfile: str. Optional flag to set the name of the file where log messages are stored, not including a file
-extension.  Defaults to (title.lower.replace(' ', '-') + '-log')
+All arguments other than contest_id are optional and are used to override existing settings.
+To add a new contest, first run setup_contest.py.
+
+@:arg contest_id: str Identifier used to look up contest settings in contest-table.txt
+@:arg --threshold: int The minimum increase in score a user needs to gain during the contest in order to be
+considered a participant at the end. Default value: 100
+@:arg --top_n: int The number of top participants to list when running updates. Default value: 5
+@:arg --winners: int The number of contest winners. Default value: 3
+@:arg --raffle_winners: int The number of participation prizes available. Default value: 3
+@:arg --participants: int The number of top participants to include in the end of contest raffle
+if raffle_mode = 'top_participants'.
 @:arg --silent, -s: bool Optional argument to disable sending of messages to Discord when running contest
 scripts for the duration of the contest. Defaults to False
 @:arg --quiet, -q: bool Runs script without sending messages to Discord, but does not stop other updates run for
 this contest from sending messages. Defaults to False
 
-
 Example call for a contest:
 
-"python end_contest.py 'CFF965D0' 'Attack test contest'"
+"python end_contest.py '241a5306'"
 """
 
-import re
 import random
 import argparse
 import matplotlib.pyplot as plt
@@ -33,17 +33,23 @@ from time import sleep
 from data_updater import *
 from os import remove
 from math import floor
-from ast import literal_eval
+from contests import *
 from gph_logging import log_message
 from webhook_handler import WebhookHandler
 
 # Establish and parse command line arguments
 parser = argparse.ArgumentParser()
 parser.add_argument('contest_id', type=str, help='Unique contest identifier.')
-parser.add_argument('title', type=str, help='Title of the contest.')
-parser.add_argument('--raffle_winners', type=int, help='Number of participation prizes available.')
-parser.add_argument('--datafile', type=str, help='File name of where to save contest data, excluding the extension.')
-parser.add_argument('--logfile', type=str, help='File name of where the logs will be saved, excluding the extension.')
+parser.add_argument('--threshold', type=int, help='The amount of XP, KC, or score needed '
+                                                  'to be counted as a participant.')
+parser.add_argument('--top_n', type=int, help='The number of top participants to list when '
+                                              'updating the contest.')
+parser.add_argument('--winners', type=int, help='The number of contest winners.')
+parser.add_argument('--raffle_winners', type=int, help='The number of participation prizes'
+                                                       ' available.')
+parser.add_argument('--participants', type=int, help='The number of participants to include'
+                                                     ' in the end of contest raffle if '
+                                                     'raffle_mode = "top_participants"')
 parser.add_argument('-s', '--silent', help='Runs script without sending messages to Discord,'
                                            ' and persists for the whole contest.', action='store_true')
 parser.add_argument('-q', '--quiet', help='Runs script without sending messages to Discord, but does not stop '
@@ -53,56 +59,44 @@ parser.add_argument('-q', '--quiet', help='Runs script without sending messages 
 # Assign variables from args and use defaults if no value given
 args = parser.parse_args()
 contest_id = args.contest_id
-title = args.title
-raffle_winners = args.raffle_winners
-if args.datafile is None:
-    datafile = re.sub(' ', '-', title)
-    datafile = re.sub('[!@#$%^&*()+=,/<>?|]', '', datafile)
-    datafile = datafile.lower() + '.csv'
-else:
-    datafile = args.datafile + '.csv'
-if args.logfile is None:
-    logfile = re.sub(' ', '-', title)
-    logfile = re.sub('[!@#$%^&*()+=,/<>?|]', '', logfile)
-    logfile = logfile.lower() + '-log.txt'
-else:
-    logfile = args.logfile + '.txt'
+
+# Load contest table from file
+with open('contest-table.txt', 'rb') as infile:
+    indata = infile.read()
+
+indata = eval(indata)
+contest_table = ContestTable(indata)
+contest = contest_table.get_contest(contest_id)
+
+# Fetch contest vars from settings
+(contest_id, title, mode, target, threshold, units, group, top_n, winners, raffle_mode,
+ raffle_winners, silent, start, end, interval, update_number, n_participants,
+ dynamic_prizes, datafile, logfile, multi_targets) = contest.get_all_data()
+
+# Parse command line arguments to override stored contest settings if used
+if args.threshold is not None:
+    threshold = args.threshold
+    contest.update_entry('threshold', threshold)
+if args.top_n is not None:
+    top_n = args.top_n
+    contest.update_entry('top_n', top_n)
+if args.winners is not None:
+    winners = args.winners
+    contest.update_entry('winners', winners)
+if args.raffle_winners is not None:
+    raffle_winners = args.raffle_winners
+    contest.update_entry('raffle_winners', raffle_winners)
+if args.participants is not None:
+    n_participants = args.participants
+    contest.update_entry('n_participants', n_participants)
 silent = args.silent
+contest.update_entry('silent', silent)
 quiet = args.quiet
 
 log_message(f'Running final update for contest {title}, contest ID: {contest_id}.', log=logfile)
 
-# Get list of settings from the footer of the CSV
-with open(datafile, 'rb') as f:
-    # Get footer from data file
-    footer = f.readlines()[-1]
-    footer = footer.decode('utf-8)')
-
-# Parse the contest settings into an array
-settings = literal_eval(footer)
-
-# Unpack settings and cast them to the correct types
-contest_id = str(settings[0])
-mode = str(settings[1])
-target = str(settings[2])
-threshold = int(settings[3])
-units = str(settings[4])
-group = str(settings[5])
-top_n = int(settings[6])
-winners = int(settings[7])
-raffle_mode = str(settings[8])
-if raffle_winners is None:
-    raffle_winners = int(settings[9])
-if not silent:
-    silent = bool(settings[10])
-start = str(settings[11])
-end = str(settings[12])
-interval = int(settings[13])
-update_number = int(settings[14])
-n_participants = int(settings[15])
-dynamic_prizes = bool(settings[16])
-
 update_number += 1
+contest.update_entry('update_number', update_number)
 
 # Load master dataframe from file
 master_df = pd.read_csv(MASTER_DF_NAME)
@@ -308,6 +302,9 @@ master_df.to_csv(MASTER_DF_NAME, index=False)
 
 log_message(f'Winners selected and raffle prize drawn for contest ID {contest_id}', log=logfile)
 
+# Write contest table to file to update any changed settings
+contest_table.to_file('contest-table')
+
 # If the --silent flag was used, don't send anything to Discord. Otherwise, send
 # a list of contest and raffle winners,  the list of players' final ranks, and the
 # graph of the winners' progress as a Discord message via a webhook.
@@ -317,6 +314,9 @@ if not (silent | quiet):
     # Using with resolves an issue where the files sent to Discord using add_file() could not be removed
     with open(plotfile, 'rb') as pf:
         wh.send_embed('', embeds=embed)
+        # Small delay to let the embed request arrive before the files
+        # Minor workaround for now
+        sleep(0.4)
         wh.add_file(pf, plotfile)
         wh.send_file(msg, filename=textfile)
 

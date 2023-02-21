@@ -28,13 +28,13 @@ Example call for a contest:
 
 import random
 import argparse
-import matplotlib.pyplot as plt
 from time import sleep
 from data_updater import *
 from os import remove
 from math import floor
 from contests import *
 from gph_logging import log_message
+from gph_graphing import make_graph
 from webhook_handler import WebhookHandler
 
 # Establish and parse command line arguments
@@ -174,33 +174,12 @@ update_list = []
 for i in range(update_number + 1):
     update_list.append(i)
 
-# Set up Pyplot to customize the appearance of the graph
-text_color = '#99AAB5'
-bg_color = '#333333'
-plot_markers = ['o', '^', 's', 'X', 'D', 'v', '*', 'p']
+# get name of plotfile
+plotname = f'{title} winners progress'
+plotfile = plotname.replace(' ', '-') + f'-winner-progress.png'
+plotfile = plotfile.lower()
 
-with plt.rc_context({'axes.spines.right': False, 'axes.spines.top': False, 'axes.facecolor': bg_color,
-                     'axes.edgecolor': text_color, 'axes.labelcolor': text_color, 'axes.titlecolor': text_color,
-                     'xtick.color': text_color, 'ytick.color': text_color, 'legend.edgecolor': text_color,
-                     'legend.fancybox': True, 'figure.facecolor': bg_color, 'figure.edgecolor': text_color,
-                     'figure.titlesize': 'large'}):
-    # Add lines for each of the top_n to the graph
-    for i in range(len(graph_data[0])):
-        plt.plot(update_list, graph_data[i + 1], label=graph_data[0][i], marker=plot_markers[i])
-
-    # More plot setup
-    plotname = f'{title} winners progress'
-    plt.xticks(update_list)
-    plt.xlabel('Update number')
-    plt.ylabel(f'{units} gained')
-    plt.title(plotname)
-    plt.legend(facecolor='#36393F', labelcolor='#99AAB5')
-
-    # Save plot to a file so it can be sent to Discord
-    plotfile = plotname.replace(' ', '-') + f'-winner-progress.png'
-    plotfile = plotfile.lower()
-    plt.tight_layout()
-    plt.savefig(plotfile)
+make_graph(graph_data, update_list, title, top_n, units, plotname, plotfile)
 
 # TODO Look into consolidating this section since there's a lot of shared code between modes
 if raffle_mode == 'classic':

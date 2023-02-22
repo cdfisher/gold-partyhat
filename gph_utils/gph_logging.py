@@ -2,7 +2,7 @@
 Implements simple logging functions for use in Gold Partyhat.
 """
 from datetime import *
-from gph_config import *
+from gph_utils.gph_config import *
 
 
 def log_message(msg, log=LOG_NAME):

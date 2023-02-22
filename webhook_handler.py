@@ -6,17 +6,20 @@ webhooks.
 Thanks to Bals2oo8 for giving me a hand with getting
 file sending working.
 """
+import os
 import json
 import requests
 import datetime
-
-from gph_config import *
+from dotenv import load_dotenv
+from gph_utils.gph_config import *
 from gph_utils.gph_logging import log_message
 
+load_dotenv()
+
 if TEST_MODE:
-    wh_url = TEST_WEBHOOK
+    wh_url = os.getenv('TEST_WEBHOOK')
 else:
-    wh_url = WEBHOOK
+    wh_url = os.getenv('WEBHOOK')
 
 
 class WebhookHandler:

@@ -14,7 +14,7 @@ run on the master dataframe.
 import os
 import argparse
 from data_updater import *
-from gph_config import LOG_NAME
+from gph_utils.gph_config import LOG_NAME
 from gph_utils.gph_logging import log_message
 
 parser = argparse.ArgumentParser()

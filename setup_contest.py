@@ -42,7 +42,7 @@ import re
 import argparse
 from hashlib import sha1
 from contests import *
-from gph_config import *
+from gph_utils.gph_config import *
 from gph_utils.gph_logging import log_message
 import hs_wrapper as hs
 

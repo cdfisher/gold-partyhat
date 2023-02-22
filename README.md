@@ -1,5 +1,5 @@
 # Gold Partyhat
-## v0.5 beta
+## v0.6 beta
 Contest tracking bot for Old School Runescape including Discord integration. 
 
 This is written as a series of Python (and Bash) scripts intended to automate the tracking of Old 
@@ -25,6 +25,10 @@ it and resolves a few bugs that were preventing full functionality.
 `osrs-highscores @ git+https://github.com/cdfisher/osrs_highscores`
 
 `matplotlib~=3.5.3`
+
+`urllib3~=1.25.11`
+
+`python-dotenv~=0.21.1`
 #### Running on a Raspberry Pi
 `numpy == 1.23.2`
 
@@ -35,7 +39,24 @@ it and resolves a few bugs that were preventing full functionality.
 `osrs-highscores @ git+https://github.com/cdfisher/osrs_highscores`
 
 `matplotlib~=3.5.3`
+
+`urllib3~=1.25.11`
+
+`python-dotenv~=0.21.1`
 ### Running the bot
+
+#### Initial setup
+Before running the bot for the first time, a few environmental variables need to be set, typically in a `.env` file.
+
+
+| **Environmental variable** | **Use**                                                                                                                                                       |
+|----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `WEBHOOK`                  | Default Discord webhook URL for the bot to use for messages                                                                                                   |
+| `TOP_PLAYERS_WEBHOOK`      | (Optional) Discord webhook used by `top_players.py` for the weekly and monthly top player tracking.                                                           |
+| `TEST_WEBHOOK`             | (Optional) Discord webhook used in conjunction with setting `TEST_MODE` in `gph_config.py` to `1`. Sends messages to a separate channel for testing purposes. |
+
+
+#### Using the bot
 
 For the time being, please see the docstrings for `start_contest.py`, 
 `update_contest.py`, and `end_contest.py` for examples of how to call those
@@ -53,6 +74,15 @@ where you have saved the files for `Gold Partyhat`. Then add the following lines
 
 ### Changelog
 Starting with v0.4, any significant changes will be listed here.
+
+#### v0.6
+
+- Returned to using environmental variables to store API secrets rather than a configuration file.
+- Implemented a contest table file and significantly simplified the process of
+running a contest (Detailed instructions and documentation coming soon).
+- Moved utility files into a dedicated subpackage `gph_utils`
+- Multiple minor cleanup and restructuring items.
+- Bash scripts are no longer needed to start, update, and end contests.
 
 #### v0.5
 

@@ -11,15 +11,18 @@ calculation
 
 import os
 import argparse
+from dotenv import load_dotenv
 from data_updater import *
-from gph_config import LOG_NAME
-from gph_logging import log_message
+from gph_utils.gph_config import LOG_NAME
+from gph_utils.gph_logging import log_message
 from webhook_handler import WebhookHandler
 
+load_dotenv()
+
 if TEST_MODE:
-    update_webhook = TEST_WEBHOOK
+    update_webhook = os.getenv('TEST_WEBHOOK')
 else:
-    update_webhook = TOP_PLAYERS_WEBHOOK
+    update_webhook = os.getenv('TOP_PLAYERS_WEBHOOK')
 
 parser = argparse.ArgumentParser()
 parser.add_argument('source_id', type=str, help='Contest identifier.')

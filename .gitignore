@@ -3,11 +3,12 @@
 
 .idea/
 
-# dotenv
+# dotenv (Contains API keys/URLs)
 .env
 
 # Config file containing API keys!
-gph_config.py
+# Not true at this time
+#gph_utils/gph_config.py
 
 # virtualenv
 .venv
@@ -17,6 +18,7 @@ ENV/
 # Various files / backups
 server/
 utils/
+demo/
 group.txt
 group.csv
 raw-group.txt

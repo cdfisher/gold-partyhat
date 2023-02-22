@@ -15,7 +15,7 @@ import os
 import argparse
 from data_updater import *
 from gph_config import LOG_NAME
-from gph_logging import log_message
+from gph_utils.gph_logging import log_message
 
 parser = argparse.ArgumentParser()
 parser.add_argument('source_id', type=str, help='Source calling update to master dataframe.')

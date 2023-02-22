@@ -12,7 +12,7 @@ import pandas as pd
 
 from datetime import *
 from gph_config import *
-from gph_logging import log_message
+from gph_utils.gph_logging import log_message
 
 
 """Used for updating the master_dataframe"""

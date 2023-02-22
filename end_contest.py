@@ -29,12 +29,12 @@ Example call for a contest:
 import random
 import argparse
 from time import sleep
-from data_updater import *
 from os import remove
 from math import floor
 from contests import *
-from gph_logging import log_message
-from gph_graphing import make_graph
+from data_updater import *
+from gph_utils.gph_logging import log_message
+from gph_utils.gph_graphing import make_graph
 from webhook_handler import WebhookHandler
 
 # Establish and parse command line arguments

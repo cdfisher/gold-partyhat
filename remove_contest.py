@@ -7,7 +7,7 @@ Utility script to remove contest settings from the contest table file.
 import os.path
 import argparse
 from contests import *
-from gph_logging import log_message
+from gph_utils.gph_logging import log_message
 
 parser = argparse.ArgumentParser()
 parser.add_argument('contest_id', type=str, help='Unique contest identifier.')

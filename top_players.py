@@ -13,7 +13,7 @@ import os
 import argparse
 from data_updater import *
 from gph_config import LOG_NAME
-from gph_logging import log_message
+from gph_utils.gph_logging import log_message
 from webhook_handler import WebhookHandler
 
 if TEST_MODE:

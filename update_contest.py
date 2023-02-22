@@ -30,8 +30,8 @@ from os import remove
 from time import sleep
 from contests import *
 from data_updater import *
-from gph_logging import log_message
-from gph_graphing import make_graph
+from gph_utils.gph_logging import log_message
+from gph_utils.gph_graphing import make_graph
 from webhook_handler import WebhookHandler
 
 # Establish and parse command line arguments
@@ -190,7 +190,7 @@ textfile = datafile[:-4] + f'-update-{update_number}-gains.txt'
 with open(textfile, 'w') as file:
     file.write(f'{title} progress update #{update_number}\n'
                f'------------------------------------------\n')
-    file.write(f'Rank: RSN:            {units:>6} gained\n')
+    file.write(f'Rank: RSN:            {units:>6} gained:\n')
     for i in range(len(contest_df.index)):
         rsn = contest_df.at[i, 'RSN']
         gain = contest_df.at[i, 'Gained']

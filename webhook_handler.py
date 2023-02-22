@@ -11,7 +11,7 @@ import requests
 import datetime
 
 from gph_config import *
-from gph_logging import log_message
+from gph_utils.gph_logging import log_message
 
 if TEST_MODE:
     wh_url = TEST_WEBHOOK

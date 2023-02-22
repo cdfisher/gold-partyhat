@@ -28,7 +28,7 @@ import argparse
 from time import sleep
 from contests import *
 from data_updater import *
-from gph_logging import log_message
+from gph_utils.gph_logging import log_message
 from webhook_handler import WebhookHandler
 
 # Establish and parse command line arguments

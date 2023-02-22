@@ -24,6 +24,7 @@ def make_graph(graph_data, update_list, units, plotname, plotfile_name):
         plt.xticks(update_list)
         plt.xlabel('Update number')
         plt.ylabel(f'{units} gained')
+        plt.ticklabel_format(axis='y', useOffset=False)     # Disable using scientific notation for large y-values
         plt.title(plotname)
         plt.legend(facecolor='#36393F', labelcolor='#99AAB5')
 

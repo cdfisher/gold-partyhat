@@ -37,10 +37,10 @@ Example call for a contest:
 
 """
 
-import os.path
-import re
 import argparse
 from hashlib import sha1
+from crontab import *
+from datetime import datetime
 from contests import *
 from gph_utils.gph_config import *
 from gph_utils.gph_logging import log_message
@@ -79,7 +79,7 @@ parser.add_argument('--interval', type=int, default=6, help='The number of hours
 parser.add_argument('-s', '--silent', help='Runs script without sending messages to Discord,'
                                            ' and persists for the whole contest.', action='store_true')
 
-#TODO Multi_targets NYI
+# TODO Multi_targets NYI
 #parser.add_argument('-m', '--multi_targets', type=str, default='{}', help='String representation of a dictionary of '
 #                                                                          'targets and weights to use in conjunction '
 #                                                                          'with the flag -target \'multi\'.')
@@ -190,4 +190,53 @@ contest_table.to_file('contest-table')
 
 print(f'Contest with ID {settings["contest_id"]} added to contest table.')
 
-# TODO add python-crontab integration
+# [DD MM YYYY - HH:MM]
+# parse start and end into datetime objects
+start_time = datetime.strptime(settings['start'], '[%d %m %Y - %H:%M]')
+end_time = datetime.strptime(settings['end'], '[%d %m %Y - %H:%M]')
+interval = int(settings['interval'])
+
+cron = CronTab(user=True)
+
+# TODO since this doesn't strictly follow the pattern of 1 update / interval
+# TODO potentially add a convar to select this behavior or strictly sticking
+# TODO to said update interval.
+
+# Create cronjob for start
+start_cmd_str = f'/usr/bin/python3 start_contest.py \'{contest_id}\''
+start_job = cron.new(command=start_cmd_str, comment=contest_id)
+start_job.setall(start_time)
+
+# Create cronjobs for update
+update_cmd_str = f'/usr/bin/python3 update_contest.py \'{contest_id}\''
+
+# if 23 - start hour > interval, create an update job for start_day ((start_hour+interval) to (23))/interval
+if (23 - start_time.hour) > interval:
+    update_job_start = cron.new(command=update_cmd_str, comment=contest_id)
+    update_job_start.setall(f'0 {start_time.hour+interval}-23/{interval} {start_time.day} {start_time.month} *')
+
+# create update job for (start_day+1) to (end_day - 1) 0-23/interval
+day_range_start = start_time.day + 1
+day_range_end = end_time.day - 1
+update_job = cron.new(command=update_cmd_str, comment=contest_id)
+
+if start_time.month != end_time.month:
+    update_job.setall(f'0 0-23/{interval} 1-{end_time.day}, {start_time.day}-31 {min(start_time.month, end_time.month)}, '
+                      f'{max(start_time.month, end_time.month)} *')
+else:
+    update_job.setall(f'0 0-23/{interval} {start_time.day}-{end_time.day} {start_time.month} *')
+
+# if (end_hour - interval) > 0, create update job end_day (0 to end_hour - 1)/interval
+if (end_time.hour - interval) > 0:
+    update_job_end = cron.new(command=update_cmd_str, comment=contest_id)
+    update_job_end.setall(f'0 0-{end_time.hour-1}/{interval} {end_time.day} {end_time.month} *')
+
+# Potentially add a configurable "one hour remaining" update
+
+# Create cronjob for end
+end_cmd_str = f'/usr/bin/python3 end_contest.py \'{contest_id}\''
+end_job = cron.new(command=end_cmd_str, comment=contest_id)
+end_job.setall(end_time)
+
+# Write jobs to crontab
+cron.write()

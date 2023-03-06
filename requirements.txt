@@ -6,3 +6,4 @@ osrs-highscores @ git+https://github.com/cdfisher/osrs_highscores@5fa3d0fbcbfbfd
 matplotlib~=3.5.3
 urllib3~=1.25.11
 python-dotenv~=0.21.1
+python-crontab~=2.7.1

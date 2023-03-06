@@ -1,5 +1,5 @@
 # Gold Partyhat
-## v0.6 beta
+## v0.7 beta
 Contest tracking bot for Old School Runescape including Discord integration. 
 
 This is written as a series of Python (and Bash) scripts intended to automate the tracking of Old 
@@ -29,6 +29,8 @@ it and resolves a few bugs that were preventing full functionality.
 `urllib3~=1.25.11`
 
 `python-dotenv~=0.21.1`
+
+`python-crontab~=2.7.1`
 #### Running on a Raspberry Pi
 `numpy == 1.23.2`
 
@@ -43,6 +45,8 @@ it and resolves a few bugs that were preventing full functionality.
 `urllib3~=1.25.11`
 
 `python-dotenv~=0.21.1`
+
+`python-crontab~=2.7.1`
 ### Running the bot
 
 #### Initial setup
@@ -74,6 +78,9 @@ where you have saved the files for `Gold Partyhat`. Then add the following lines
 
 ### Changelog
 Starting with v0.4, any significant changes will be listed here.
+
+#### v0.7
+- Adds automatic management of contest cron jobs via `python-crontab`.
 
 #### v0.6
 

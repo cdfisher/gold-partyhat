@@ -66,6 +66,42 @@ For the time being, please see the docstrings for `start_contest.py`,
 `update_contest.py`, and `end_contest.py` for examples of how to call those
 scripts.
 
+#### Setting up a contest
+
+To set up a contest, run `setup_contest.py` as below:
+
+`$ python3 setup_contest.py 'target' 'title' 'start_time' 'end_time' 'group'
+--threshold 50000`
+
+**setup_contest.py arguments:**
+
+*Default values for these arguments are set in /gph_utils/gph_config.py*
+
+| **Argument**                                   | **Type** | **Description**                                                                                                                                                                                    |
+|------------------------------------------------|----------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `target`                                       | `str`    | Skill, target, activity, or 'multi' (NYI) denoting the specific target to track                                                                                                                    |
+| `title`                                        | `str`    | The name of the contest                                                                                                                                                                            |
+| `start`                                        | `str`    | Representation of a Python `datetime` object in the form '[DD MM YYYY - HH:MM]' to mark the start of the contest.                                                                                  |
+| `end`                                          | `str`    | Representation of a Python `datetime` object in the form '[DD MM YYYY - HH:MM]' to mark the end of the contest.                                                                                    |
+| `group`                                        | `str`    | Name of the text file listing group members to track, excluding the file extension.                                                                                                                |
+| *(Optional)* `--force_id`                      | `str`    | Manually sets contest_id to a given value. Otherwise defaults to generating an ID value.                                                                                                           |
+| *(Optional)* `--threshold`                     | `int`    | Minimum increase in score a user needs to gain during the contest in order to be considered a participant at the end. Default value: 100                                                           |
+| *(Optional)* `--top_n`                         | `int`    | Number of top participants to list when running updates. Default value: 5                                                                                                                          |
+| *(Optional)* `--winners`                       | `int`    | Number of contest winners. Default value: 3                                                                                                                                                        |
+| *(Optional)* `--raffle_winners`                | `int`    | Number of participation prizes available. Default value: 3                                                                                                                                         |
+| *(Optional)* `--raffle_mode`                   | `str`    | Options: `classic`, `top_participants` (Default). Sets eiligbility rules for the end of contest raffle.                                                                                            |
+| *(Optional)* `--participants`                  | `int`    | Number of top participants to include in the end of contest raffle if the raffle mode is set to `top_participants`. Default value: 10                                                              |
+| *(Optional)* `--datafile`                      | `str`    | Manually sets the name of the file where contest data is stored, not including a file extension.  Defaults to title.lower.replace(' ', '-'), with any other special characters removed.            |
+| *(Optional)* `--logfile`                       | `str`    | Manually sets the name of the file where log messages are stored, not including a file extension. Defaults to (title.lower.replace(' ', '-') + '-log'), with any other special characters removed. |
+| *(Optional)* `--interval`                      | `int`    | Interval (in hours) at which the contest tracking updates. Default value: 6                                                                                                                        |
+| *(Optional)* `--silent`, `-s`                  | None     | If used, disables the sending of messages to Discord when running contest scripts for the duration of the contest.                                                                                 |
+
+#### Removing a contest
+
+To remove a contest, run `remove_contest.py` as below:
+
+`$ python3 remove_contest.py 'contest_id'`
+
 ### Using the automated weekly and monthly contests
 Using `cron`, make sure your `crontab` file has `$HOME` set to the location of the directory
 where you have saved the files for `Gold Partyhat`. Then add the following lines to your `crontab` file.
@@ -81,6 +117,7 @@ Starting with v0.4, any significant changes will be listed here.
 
 #### v0.7
 - Adds automatic management of contest cron jobs via `python-crontab`.
+- Improved documentation.
 
 #### v0.6
 

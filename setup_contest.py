@@ -5,9 +5,9 @@ Default values for optional arguments are set in gph_config.py
 @:arg target: str in hs.SKILLS, hs.ACTIVITIES, hs.BOSSES, or 'multi' (NYI) denoting the specific target to track.
 @:arg title: str The name of the contest.
 @:arg start: str representation of a datetime object in the form '[DD MM YYYY - HH:MM]' to mark the start of the
-contest. Included for future use by a planned feature to automatically create cronjobs. Not yet used.
+contest.
 @:arg end: str representation of a datetime object in the form '[DD MM YYYY - HH:MM]' to mark the end of the
-contest. Included for future use by a planned feature to automatically create cronjobs. Not yet used.
+contest.
 @:arg group: str The name of the text file listing group members to track, excluding the file extension.
 @:arg --force_id: str Manually sets contest_id to a given value. Otherwise defaults to generating an ID value.
 @:arg --threshold: int The minimum increase in score a user needs to gain during the contest in order to be
@@ -23,12 +23,9 @@ if raffle_mode = 'top_participants'.
 extension.  Defaults to title.lower.replace(' ', '-'), with any other special characters removed.
 @:arg --logfile: str. Optional flag to set the name of the file where log messages are stored, not including a file
 extension.  Defaults to (title.lower.replace(' ', '-') + '-log'), with any other special characters removed.
-@:arg --interval: int Optional argument to set the interval at which the contest updates, in hours. Defaults to 6.
-Included for future use by a planned feature to automatically create cronjobs. Not yet used.
+@:arg --interval: int Optional argument to set the interval at which the contest updates, in hours. Default value: 6
 @:arg --silent, -s: bool Optional argument to disable sending of messages to Discord when running contest
 scripts for the duration of the contest. Defaults to False
-@:arg --quiet, -q: bool Runs script without sending messages to Discord, but does not stop other updates run for
-this contest from sending messages. Defaults to False
 
 Example call for a contest:
 

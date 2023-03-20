@@ -105,7 +105,10 @@ gains_df = gains_df.sort_values(by=['XP gained'], ascending=False).reset_index(d
 
 time_period_number = source_id[-4:-2]
 if time_period_number[1] == '1':
-    suffix = 'st'
+    if time_period_number[0] == '1':
+        suffix = 'th'
+    else:
+        suffix = 'st'
 elif time_period_number[1] == '2':
     suffix = 'nd'
 elif time_period_number[1] == '3':

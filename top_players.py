@@ -110,9 +110,15 @@ if time_period_number[1] == '1':
     else:
         suffix = 'st'
 elif time_period_number[1] == '2':
-    suffix = 'nd'
+    if time_period_number[0] == '1':
+        suffix = 'th'
+    else:
+        suffix = 'nd'
 elif time_period_number[1] == '3':
-    suffix = 'rd'
+    if time_period_number[0] == '1':
+        suffix = 'th'
+    else:
+        suffix = 'rd'
 else:
     suffix = 'th'
 if str(time_period_number)[0] == '0':

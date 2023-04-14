@@ -218,10 +218,14 @@ day_range_end = end_time.day - 1
 update_job = cron.new(command=update_cmd_str, comment=contest_id)
 
 if start_time.month != end_time.month:
-    update_job.setall(f'0 0-23/{interval} 1-{end_time.day}, {start_time.day}-31 {min(start_time.month, end_time.month)}, '
+    update_job.setall(f'0 0-23/{interval} 1-{day_range_end}, {day_range_start}-31 {min(start_time.month, end_time.month)}, '
                       f'{max(start_time.month, end_time.month)} *')
 else:
-    update_job.setall(f'0 0-23/{interval} {start_time.day}-{end_time.day} {start_time.month} *')
+    # Handles case where contest is less than 3 days long. Unlikely to come up in practice but common in testing.
+    if day_range_end < day_range_start:
+        update_job.setall(f'0 0-23/{interval} {day_range_end}-{day_range_start} {start_time.month} *')
+    else:
+        update_job.setall(f'0 0-23/{interval} {day_range_start}-{day_range_end} {start_time.month} *')
 
 # if (end_hour - interval) > 0, create update job end_day (0 to end_hour - 1)/interval
 if (end_time.hour - interval) > 0:

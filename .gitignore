@@ -19,6 +19,7 @@ ENV/
 server/
 utils/
 demo/
+archive/
 group.txt
 group.csv
 raw-group.txt

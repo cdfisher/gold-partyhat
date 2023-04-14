@@ -5,9 +5,9 @@ Default values for optional arguments are set in gph_config.py
 @:arg target: str in hs.SKILLS, hs.ACTIVITIES, hs.BOSSES, or 'multi' (NYI) denoting the specific target to track.
 @:arg title: str The name of the contest.
 @:arg start: str representation of a datetime object in the form '[DD MM YYYY - HH:MM]' to mark the start of the
-contest. Included for future use by a planned feature to automatically create cronjobs. Not yet used.
+contest.
 @:arg end: str representation of a datetime object in the form '[DD MM YYYY - HH:MM]' to mark the end of the
-contest. Included for future use by a planned feature to automatically create cronjobs. Not yet used.
+contest.
 @:arg group: str The name of the text file listing group members to track, excluding the file extension.
 @:arg --force_id: str Manually sets contest_id to a given value. Otherwise defaults to generating an ID value.
 @:arg --threshold: int The minimum increase in score a user needs to gain during the contest in order to be
@@ -23,12 +23,9 @@ if raffle_mode = 'top_participants'.
 extension.  Defaults to title.lower.replace(' ', '-'), with any other special characters removed.
 @:arg --logfile: str. Optional flag to set the name of the file where log messages are stored, not including a file
 extension.  Defaults to (title.lower.replace(' ', '-') + '-log'), with any other special characters removed.
-@:arg --interval: int Optional argument to set the interval at which the contest updates, in hours. Defaults to 6.
-Included for future use by a planned feature to automatically create cronjobs. Not yet used.
+@:arg --interval: int Optional argument to set the interval at which the contest updates, in hours. Default value: 6
 @:arg --silent, -s: bool Optional argument to disable sending of messages to Discord when running contest
 scripts for the duration of the contest. Defaults to False
-@:arg --quiet, -q: bool Runs script without sending messages to Discord, but does not stop other updates run for
-this contest from sending messages. Defaults to False
 
 Example call for a contest:
 
@@ -37,10 +34,10 @@ Example call for a contest:
 
 """
 
-import os.path
-import re
 import argparse
 from hashlib import sha1
+from crontab import *
+from datetime import datetime
 from contests import *
 from gph_utils.gph_config import *
 from gph_utils.gph_logging import log_message
@@ -79,7 +76,7 @@ parser.add_argument('--interval', type=int, default=6, help='The number of hours
 parser.add_argument('-s', '--silent', help='Runs script without sending messages to Discord,'
                                            ' and persists for the whole contest.', action='store_true')
 
-#TODO Multi_targets NYI
+# TODO Multi_targets NYI
 #parser.add_argument('-m', '--multi_targets', type=str, default='{}', help='String representation of a dictionary of '
 #                                                                          'targets and weights to use in conjunction '
 #                                                                          'with the flag -target \'multi\'.')
@@ -190,4 +187,57 @@ contest_table.to_file('contest-table')
 
 print(f'Contest with ID {settings["contest_id"]} added to contest table.')
 
-# TODO add python-crontab integration
+# [DD MM YYYY - HH:MM]
+# parse start and end into datetime objects
+start_time = datetime.strptime(settings['start'], '[%d %m %Y - %H:%M]')
+end_time = datetime.strptime(settings['end'], '[%d %m %Y - %H:%M]')
+interval = int(settings['interval'])
+
+cron = CronTab(user=True)
+
+# TODO since this doesn't strictly follow the pattern of 1 update / interval
+# TODO potentially add a convar to select this behavior or strictly sticking
+# TODO to said update interval.
+
+# Create cronjob for start
+start_cmd_str = f'/usr/bin/python3 start_contest.py \'{contest_id}\''
+start_job = cron.new(command=start_cmd_str, comment=contest_id)
+start_job.setall(start_time)
+
+# Create cronjobs for update
+update_cmd_str = f'/usr/bin/python3 update_contest.py \'{contest_id}\''
+
+# if 23 - start hour > interval, create an update job for start_day ((start_hour+interval) to (23))/interval
+if (23 - start_time.hour) > interval:
+    update_job_start = cron.new(command=update_cmd_str, comment=contest_id)
+    update_job_start.setall(f'0 {start_time.hour+interval}-23/{interval} {start_time.day} {start_time.month} *')
+
+# create update job for (start_day+1) to (end_day - 1) 0-23/interval
+day_range_start = start_time.day + 1
+day_range_end = end_time.day - 1
+update_job = cron.new(command=update_cmd_str, comment=contest_id)
+
+if start_time.month != end_time.month:
+    update_job.setall(f'0 0-23/{interval} 1-{day_range_end}, {day_range_start}-31 {min(start_time.month, end_time.month)}, '
+                      f'{max(start_time.month, end_time.month)} *')
+else:
+    # Handles case where contest is less than 3 days long. Unlikely to come up in practice but common in testing.
+    if day_range_end < day_range_start:
+        update_job.setall(f'0 0-23/{interval} {day_range_end}-{day_range_start} {start_time.month} *')
+    else:
+        update_job.setall(f'0 0-23/{interval} {day_range_start}-{day_range_end} {start_time.month} *')
+
+# if (end_hour - interval) > 0, create update job end_day (0 to end_hour - 1)/interval
+if (end_time.hour - interval) > 0:
+    update_job_end = cron.new(command=update_cmd_str, comment=contest_id)
+    update_job_end.setall(f'0 0-{end_time.hour-1}/{interval} {end_time.day} {end_time.month} *')
+
+# Potentially add a configurable "one hour remaining" update
+
+# Create cronjob for end
+end_cmd_str = f'/usr/bin/python3 end_contest.py \'{contest_id}\''
+end_job = cron.new(command=end_cmd_str, comment=contest_id)
+end_job.setall(end_time)
+
+# Write jobs to crontab
+cron.write()

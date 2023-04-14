@@ -37,29 +37,30 @@ FORMATTED_ACTIVITIES = ['League Points', 'Bounty Hunter (Hunter)', 'Bounty Hunte
 
 """List of all valid bosses listed on highscores
 """
-BOSSES = ['abyssal_sire', 'alchemical_hydra', 'barrows_chests', 'bryophyta', 'callisto', 'cerberus',
-          'chambers_of_xeric', 'chambers_of_xeric_challenge_mode', 'chaos_elemental', 'chaos_fanatic',
+BOSSES = ['abyssal_sire', 'alchemical_hydra', 'artio', 'barrows_chests', 'bryophyta', 'callisto', 'cal_varion',
+          'cerberus', 'chambers_of_xeric', 'chambers_of_xeric_challenge_mode', 'chaos_elemental', 'chaos_fanatic',
           'commander_zilyana', 'corporeal_beast', 'crazy_archaeologist', 'dagannoth_prime',
           'dagannoth_rex', 'dagannoth_supreme', 'deranged_archaeologist', 'general_graardor',
           'giant_mole', 'grotesque_guardians', 'hespori', 'kalphite_queen', 'king_black_dragon',
-          'kraken', 'kree_arra', 'kril_tsutsaroth', 'mimic', 'nex', 'nightmare', 'phosanis_nightmare',
-          'obor', 'phantom_muspah', 'sarachnis', 'scorpia', 'skotizo', 'tempoross', 'the_gauntlet', 'the_corrupted_gauntlet',
-          'theatre_of_blood', 'theatre_of_blood_hard_mode', 'thermonuclear_smoke_devil',
+          'kraken', 'kree_arra', 'kril_tsutsaroth', 'mimic', 'nex', 'nightmare', 'phosanis_nightmare', 'obor',
+          'phantom_muspah', 'sarachnis', 'scorpia', 'skotizo', 'spindel', 'tempoross', 'the_gauntlet',
+          'the_corrupted_gauntlet', 'theatre_of_blood', 'theatre_of_blood_hard_mode', 'thermonuclear_smoke_devil',
           'tombs_of_amascut', 'tombs_of_amascut_expert_mode', 'tzkal_zuk', 'tztok_jad', 'venenatis',
           'vet_ion', 'vorkath', 'wintertodt', 'zalcano', 'zulrah']
 
 """Formatted list of bosses, index matched with BOSSES
 """
-FORMATTED_BOSSES = ['Abyssal Sire', 'Alchemical Hydra', 'Barrows Chests', 'Bryophyta', 'Callisto', 'Cerberus',
-                    'Chambers of Xeric', 'Chambers of Xeric Challenge Mode', 'Chaos Elemental', 'Chaos Fanatic',
-                    'Commander Zilyana', 'Corporeal Beast', 'Crazy Archaeologist', 'Dagannoth Prime',
-                    'Dagannoth Rex', 'Dagannoth Supreme', 'Deranged Archaeologist', 'General Graardor',
-                    'Giant Mole', 'Grotesque Guardians', 'Hespori', 'Kalphite Queen', 'King Black Dragon',
-                    'Kraken', 'Kree\'arra', 'K\'ril Tsutsaroth', 'Mimic', 'Nex', 'Nightmare', 'Phosani\'s Nightmare',
-                    'Obor', 'Phantom Muspah', 'Sarachnis', 'Scorpia', 'Skotizo', 'Tempoross', 'The Gauntlet', 'The Corrupted Gauntlet',
-                    'Theatre of Blood', 'Theatre of Blood Hard Mode', 'Thermonuclear Smoke Devil',
-                    'Tombs of Amascut', 'Tombs of Amascut Expert Mode', 'TzKal-Zuk', 'TzTok-Jad', 'Venenatis',
-                    'Vet\'ion', 'Vorkath', 'Wintertodt', 'Zalcano', 'Zulrah']
+FORMATTED_BOSSES = ['Abyssal Sire', 'Alchemical Hydra', 'Artio', 'Barrows Chests', 'Bryophyta', 'Callisto',
+                    'Cal\'varion', 'Cerberus', 'Chambers of Xeric', 'Chambers of Xeric Challenge Mode',
+                    'Chaos Elemental', 'Chaos Fanatic', 'Commander Zilyana', 'Corporeal Beast', 'Crazy Archaeologist',
+                    'Dagannoth Prime', 'Dagannoth Rex', 'Dagannoth Supreme', 'Deranged Archaeologist',
+                    'General Graardor', 'Giant Mole', 'Grotesque Guardians', 'Hespori', 'Kalphite Queen',
+                    'King Black Dragon', 'Kraken', 'Kree\'arra', 'K\'ril Tsutsaroth', 'Mimic', 'Nex', 'Nightmare',
+                    'Phosani\'s Nightmare', 'Obor', 'Phantom Muspah', 'Sarachnis', 'Scorpia', 'Skotizo', 'Spindel',
+                    'Tempoross', 'The Gauntlet', 'The Corrupted Gauntlet', 'Theatre of Blood',
+                    'Theatre of Blood Hard Mode', 'Thermonuclear Smoke Devil', 'Tombs of Amascut',
+                    'Tombs of Amascut Expert Mode', 'TzKal-Zuk', 'TzTok-Jad', 'Venenatis', 'Vet\'ion', 'Vorkath',
+                    'Wintertodt', 'Zalcano', 'Zulrah']
 
 """EHB_RATES:
     Dict of bosses and their respective kills per efficient bossing hour.
@@ -70,9 +71,11 @@ FORMATTED_BOSSES = ['Abyssal Sire', 'Alchemical Hydra', 'Barrows Chests', 'Bryop
     """
 EHB_RATES = {'abyssal_sire': (42.0, 32.0),
              'alchemical_hydra': (27.0, 26.0),
+             'artio': (-1.0, -1.0),
              'barrows_chests': (-1.0, 18.0),
              'bryophyta': (-1.0, 9.0),
              'callisto': (50.0, 30.0),
+             'cal_varion': (-1.0, -1.0),
              'cerberus': (61.0, 54.0),
              'chambers_of_xeric': (3.0, 2.8),
              'chambers_of_xeric_challenge_mode': (2.2, 2.0),
@@ -103,6 +106,7 @@ EHB_RATES = {'abyssal_sire': (42.0, 32.0),
              'sarachnis': (80.0, 56.0),
              'scorpia': (130.0, 60.0),
              'skotizo': (45.0, 38.0),
+             'spindel': (-1.0, -1.0),
              'tempoross': (-1.0, -1.0),
              'the_gauntlet': (10.0, 10.0),
              'the_corrupted_gauntlet': (6.5, 6.5),

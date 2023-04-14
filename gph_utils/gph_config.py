@@ -4,7 +4,7 @@ Settings to be used by the Gold Partyhat bot
 
 # ---------------Bot info---------------
 # Version number for logging purposes
-GPH_VERSION = 'v0.6 beta'
+GPH_VERSION = 'v0.7 beta'
 # Bot name to include in JSON payload
 BOT_NAME = 'Gold Partyhat'
 

@@ -4,8 +4,8 @@ Utility script to remove contest settings from the contest table file.
 @:arg contest_id: str identifier of the contest to remove.
 """
 
-import os.path
 import argparse
+from crontab import *
 from contests import *
 from gph_utils.gph_logging import log_message
 
@@ -32,3 +32,9 @@ print(f'Removing contest {contest_id} with settings: \n'
 
 contest_table.remove_contest(contest_id)
 contest_table.to_file('contest-table')
+
+# Remove any cron jobs with a comment set to contest_id (so any jobs created
+# by setup_contest.py
+cron = CronTab(user=True)
+cron.remove_all(comment=contest_id)
+cron.write()

@@ -102,7 +102,7 @@ def update_entry(infile: str, game_mode: str, target: str, update_mode: str,
 
     elif update_mode == 'update':
         # Read contest_dataframe from file
-        df = pd.read_csv(contest_datafile, skipfooter=1, engine='python')
+        df = pd.read_csv(contest_datafile)
 
         for i in range(len(df.index)):
             rsn = df.at[i, 'RSN']
@@ -110,7 +110,7 @@ def update_entry(infile: str, game_mode: str, target: str, update_mode: str,
                 usr = hs.get_user(rsn)
             except ValueError:
                 # If a RSN that's already in the contest dataframe isn't found, they likely
-                # changes their name, so flag this in the log so their new name can be
+                # changed their name, so flag this in the log so their new name can be
                 # edited into the datafile
                 log_message(f'User {rsn} not found! Potential name change detected!',
                             log=logfile)
@@ -158,7 +158,7 @@ def update_entry(infile: str, game_mode: str, target: str, update_mode: str,
 
     elif update_mode == 'end':
         # Read contest dataframe from file
-        df = pd.read_csv(contest_datafile, skipfooter=1, engine='python')
+        df = pd.read_csv(contest_datafile)
 
         for i in range(len(df.index)):
             rsn = df.at[i, 'RSN']
@@ -166,7 +166,7 @@ def update_entry(infile: str, game_mode: str, target: str, update_mode: str,
                 usr = hs.get_user(rsn)
             except ValueError:
                 # If a RSN that's already in the contest dataframe isn't found, they likely
-                # changes their name, so flag this in the log so their new name can be
+                # changed their name, so flag this in the log so their new name can be
                 # edited into the datafile
                 log_message(f'User {rsn} not found! Potential name change detected!',
                             log=logfile)

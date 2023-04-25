@@ -1,5 +1,5 @@
 # Gold Partyhat
-## v0.7 beta
+## v0.7.1 beta
 Contest tracking bot for Old School Runescape including Discord integration. 
 
 This is written as a series of Python (and Bash) scripts intended to automate the tracking of Old 
@@ -114,6 +114,9 @@ where you have saved the files for `Gold Partyhat`. Then add the following lines
 
 ### Changelog
 Starting with v0.4, any significant changes will be listed here.
+
+#### v0.7.1
+- Resolves bug where low-ranked players would have a chance to be removed from tracking when running a contest update.
 
 #### v0.7
 - Adds automatic management of contest cron jobs via `python-crontab`.

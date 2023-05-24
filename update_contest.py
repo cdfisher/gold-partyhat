@@ -126,7 +126,7 @@ embed = [
     {
         "title": f"{title} top {top_n} (so far)",
         "color": 16768768,
-        "description": f"",
+        "description": f"Updated at <t:{int(datetime.now().timestamp())}:f>",
         "fields": fields
 
     }

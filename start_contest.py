@@ -122,12 +122,17 @@ log_message(f'Competition started successfully. Tracking {n_users} '
 # Write contest table to file to update any changed settings
 contest_table.to_file('contest-table')
 
+end_timestamp = datetime.strptime(end, '[%d %m %Y - %H:%M]')
+timezone = datetime.now().astimezone().tzinfo
+end_timestamp = int(end_timestamp.replace(tzinfo=timezone).timestamp())
+
 embed = [
     {
         "title": f"Running {BOT_NAME} {GPH_VERSION}",
         "color": 16768768,
         "description": f"{title} has begun. Get {threshold:,} {units} to be eligible for the "
-                       f"participation raffle!\n\n{n_users} players are being tracked.",
+                       f"participation raffle!\n\n{n_users} players are being tracked.\n"
+                       f"This contest ends on <t:{end_timestamp}:D> at <t:{end_timestamp}:t>.",
         "fields": [
             {
                 "name": "Contest ID:",

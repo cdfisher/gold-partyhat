@@ -23,21 +23,22 @@ FORMATTED_SKILLS = ['Overall', 'Attack', 'Defence', 'Strength', 'Hitpoints', 'Ra
 
 """List of all valid activities listed on highscores
 """
-ACTIVITIES = ['league_points', 'bounty_hunter_hunter', 'bounty_hunter_rogue', 'clue_scrolls_all',
-              'clue_scrolls_beginner', 'clue_scrolls_easy', 'clue_scrolls_medium', 'clue_scrolls_hard',
-              'clue_scrolls_elite', 'clue_scrolls_master', 'lms_rank', 'pvp_arena_rank',
-              'soul_wars_zeal', 'rifts_closed']
+ACTIVITIES = ['league_points', 'bounty_hunter_hunter', 'bounty_hunter_rogue', 'bounty_hunter_legacy_hunter',
+              'bounty_hunter_legacy_rogue', 'clue_scrolls_all', 'clue_scrolls_beginner', 'clue_scrolls_easy',
+              'clue_scrolls_medium', 'clue_scrolls_hard', 'clue_scrolls_elite', 'clue_scrolls_master', 'lms_rank',
+              'pvp_arena_rank', 'soul_wars_zeal', 'rifts_closed']
 
 """Formatted list of activities, index matched with ACTIVITIES
 """
-FORMATTED_ACTIVITIES = ['League Points', 'Bounty Hunter (Hunter)', 'Bounty Hunter (Rogue)', 'Clue Scrolls (All)',
+FORMATTED_ACTIVITIES = ['League Points', 'Bounty Hunter (Hunter)', 'Bounty Hunter (Rogue)',
+                        'Bounty Hunter (Legacy) - Hunter', 'Bounty Hunter (Legacy) - Rogue', 'Clue Scrolls (All)',
                         'Clue Scrolls (Beginner)', 'Clue Scrolls (Easy)', 'Clue Scrolls (Medium)',
                         'Clue Scrolls (Hard)', 'Clue Scrolls (Elite)', 'Clue Scrolls (Master)', 'LMS Rank',
                         'PvP Arena Rank', 'Soul Wars Zeal', 'Rifts Closed']
 
 """List of all valid bosses listed on highscores
 """
-BOSSES = ['abyssal_sire', 'alchemical_hydra', 'artio', 'barrows_chests', 'bryophyta', 'callisto', 'cal_varion',
+BOSSES = ['abyssal_sire', 'alchemical_hydra', 'artio', 'barrows_chests', 'bryophyta', 'callisto', 'calvar_ion',
           'cerberus', 'chambers_of_xeric', 'chambers_of_xeric_challenge_mode', 'chaos_elemental', 'chaos_fanatic',
           'commander_zilyana', 'corporeal_beast', 'crazy_archaeologist', 'dagannoth_prime',
           'dagannoth_rex', 'dagannoth_supreme', 'deranged_archaeologist', 'general_graardor',
@@ -51,7 +52,7 @@ BOSSES = ['abyssal_sire', 'alchemical_hydra', 'artio', 'barrows_chests', 'bryoph
 """Formatted list of bosses, index matched with BOSSES
 """
 FORMATTED_BOSSES = ['Abyssal Sire', 'Alchemical Hydra', 'Artio', 'Barrows Chests', 'Bryophyta', 'Callisto',
-                    'Cal\'varion', 'Cerberus', 'Chambers of Xeric', 'Chambers of Xeric Challenge Mode',
+                    'Calvar\'ion', 'Cerberus', 'Chambers of Xeric', 'Chambers of Xeric Challenge Mode',
                     'Chaos Elemental', 'Chaos Fanatic', 'Commander Zilyana', 'Corporeal Beast', 'Crazy Archaeologist',
                     'Dagannoth Prime', 'Dagannoth Rex', 'Dagannoth Supreme', 'Deranged Archaeologist',
                     'General Graardor', 'Giant Mole', 'Grotesque Guardians', 'Hespori', 'Kalphite Queen',
@@ -75,7 +76,7 @@ EHB_RATES = {'abyssal_sire': (42.0, 32.0),
              'barrows_chests': (-1.0, 18.0),
              'bryophyta': (-1.0, 9.0),
              'callisto': (50.0, 30.0),
-             'cal_varion': (-1.0, -1.0),
+             'calvar_ion': (-1.0, -1.0),
              'cerberus': (61.0, 54.0),
              'chambers_of_xeric': (3.0, 2.8),
              'chambers_of_xeric_challenge_mode': (2.2, 2.0),
